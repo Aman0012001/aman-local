@@ -68,28 +68,28 @@ export default function AdminDashboard() {
             value: stats?.totalUsers || '0',
             icon: Users,
             color: 'bg-gradient-to-br from-[#EE4444] to-[#CC2222]',
-            shadow: 'shadow-red-500/20'
+            accentColor: 'bg-white/10'
         },
         {
             label: 'Total Businesses',
             value: stats?.totalBusinesses || '0',
             icon: Briefcase,
             color: 'bg-gradient-to-br from-[#3366CC] to-[#1144AA]',
-            shadow: 'shadow-blue-500/20'
+            accentColor: 'bg-white/10'
         },
         {
             label: 'Total Reviews',
             value: stats?.totalReviews || '0',
             icon: MessageSquare,
             color: 'bg-gradient-to-br from-[#33AA88] to-[#118866]',
-            shadow: 'shadow-emerald-500/20'
+            accentColor: 'bg-white/10'
         },
         {
             label: 'Pending Verification',
             value: stats?.pendingBusinesses || '0',
             icon: ShieldAlert,
             color: 'bg-gradient-to-br from-[#FFAA33] to-[#FF8811]',
-            shadow: 'shadow-orange-500/20'
+            accentColor: 'bg-white/10'
         },
     ];
 
