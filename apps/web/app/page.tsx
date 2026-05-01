@@ -807,6 +807,7 @@ export default function HomePage() {
               id: "f1",
               name: "Ahmed S.",
               location: "Karachi",
+              role: "Local Guide",
               text: "Found a great plumber in Karachi in minutes. Highly recommend!",
               rating: 5,
               img: "https://i.pravatar.cc/150?u=ahmed",
@@ -815,6 +816,7 @@ export default function HomePage() {
               id: "f2",
               name: "Zainab R.",
               location: "Lahore",
+              role: "Local Guide",
               text: "Excellent service. Easy to find and contact businesses in Lahore.",
               rating: 5,
               img: "https://i.pravatar.cc/150?u=zainab",
@@ -823,6 +825,7 @@ export default function HomePage() {
               id: "f3",
               name: "Bilal K.",
               location: "Islamabad",
+              role: "Local Guide",
               text: "Trusted and reliable listings. Best platform for Pakistan.",
               rating: 5,
               img: "https://i.pravatar.cc/150?u=bilal",
@@ -831,6 +834,7 @@ export default function HomePage() {
               id: "f4",
               name: "Sara M.",
               location: "Faisalabad",
+              role: "Local Guide",
               text: "Booking appointments has never been so easy. Love this platform!",
               rating: 4,
               img: "https://i.pravatar.cc/150?u=sara",
@@ -839,6 +843,7 @@ export default function HomePage() {
               id: "f5",
               name: "Usman T.",
               location: "Rawalpindi",
+              role: "Local Guide",
               text: "Great variety of businesses listed. Found exactly what I needed.",
               rating: 5,
               img: "https://i.pravatar.cc/150?u=usman",
@@ -847,6 +852,7 @@ export default function HomePage() {
               id: "f6",
               name: "Hina N.",
               location: "Multan",
+              role: "Local Guide",
               text: "Very user-friendly! Found a top doctor in my area within seconds.",
               rating: 5,
               img: "https://i.pravatar.cc/150?u=hina",
@@ -855,13 +861,14 @@ export default function HomePage() {
           // Fallback to professional reviews if no community results
           const cards =
             statsComments && Array.isArray(statsComments) && statsComments.length > 0
-              ? statsComments.map((rev) => ({
+              ? statsComments.map((rev: any) => ({
                 id: rev.id,
                 name: rev.user?.fullName || "Aman U.",
+                location: rev.user?.city || "Local",
                 role: "Verified Local",
                 text: rev.content,
                 rating: rev.rating || 5,
-                image: rev.user?.avatarUrl || null,
+                img: rev.user?.avatarUrl || null,
                 date: rev.createdAt,
                 business: rev.business?.title || "Local Shop",
               }))
