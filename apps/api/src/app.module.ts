@@ -44,11 +44,17 @@ import { NotificationsGateway } from './gateways/notifications.gateway';
           port: configService.get<number>('DB_PORT', 5432),
           username: configService.get<string>('DB_USERNAME', 'postgres'),
           password: configService.get<string>('DB_PASSWORD', '5432'),
-          database: configService.get<string>('DB_DATABASE', 'business_saas_db'),
+          database: configService.get<string>(
+            'DB_DATABASE',
+            'business_saas_db',
+          ),
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
           synchronize: false,
           logging: configService.get<string>('NODE_ENV') === 'development',
-          ssl: configService.get<string>('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
+          ssl:
+            configService.get<string>('DB_SSL') === 'true'
+              ? { rejectUnauthorized: false }
+              : false,
         };
       },
       inject: [ConfigService],
@@ -63,4 +69,4 @@ import { NotificationsGateway } from './gateways/notifications.gateway';
   controllers: [AppController],
   providers: [AppService, NotificationsGateway],
 })
-export class AppModule { }
+export class AppModule {}

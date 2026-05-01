@@ -10,7 +10,10 @@ const config: TypeOrmModuleOptions = {
   entities: ['dist/**/*.entity{.ts,.js}', 'src/**/*.entity{.ts,.js}'],
   synchronize: true, // Force sync for development to align with local Postgres
   logging: true,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  ssl:
+    process.env.NODE_ENV === 'production'
+      ? { rejectUnauthorized: false }
+      : false,
 };
 
 // Debug logging
@@ -19,7 +22,9 @@ console.log('🔍 TypeORM Configuration:', {
   port: config.port,
   username: config.username,
   database: config.database,
-  password: config.password ? '***' + String(config.password).slice(-2) : '(empty)',
+  password: config.password
+    ? '***' + String(config.password).slice(-2)
+    : '(empty)',
 });
 
 export const typeOrmConfig = config;
