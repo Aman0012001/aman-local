@@ -14,6 +14,7 @@ import { ChatService } from './chat.service';
 import { SendMessageDto } from './dto/chat.dto';
 
 @WebSocketGateway({
+    namespace: 'chat',
     cors: {
         origin: true,
         credentials: true,

@@ -13,6 +13,7 @@ import { Repository } from 'typeorm';
 import { User } from '../../entities/user.entity';
 
 @WebSocketGateway({
+    namespace: 'notifications',
     cors: {
         origin: true,
         credentials: true,
