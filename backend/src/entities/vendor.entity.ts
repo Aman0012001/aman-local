@@ -43,6 +43,9 @@ export class Vendor {
     @Column({ name: 'business_address', nullable: true, type: 'text' })
     businessAddress: string;
 
+    @Column({ length: 100, nullable: true })
+    city: string;
+
     @Column({ name: 'gst_number', nullable: true, length: 15 })
     gstNumber: string;
 
