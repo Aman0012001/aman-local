@@ -251,7 +251,8 @@ export class BusinessesService {
             .leftJoinAndSelect('listing.businessHours', 'businessHours')
             .leftJoinAndSelect('listing.businessAmenities', 'businessAmenities')
             .leftJoinAndSelect('businessAmenities.amenity', 'amenity')
-            .where('listing.status IN (:...statuses)', { statuses: [BusinessStatus.PENDING, BusinessStatus.APPROVED] });
+            .where('listing.status = :status', { status: BusinessStatus.APPROVED })
+            .andWhere('(category.id IS NULL OR category.status = :catStatus)', { catStatus: CategoryStatus.ACTIVE });
 
         // Apply Search Results from Elasticsearch or fallback to ILIKE
         if (esIds && esIds.length > 0) {
@@ -494,7 +495,7 @@ export class BusinessesService {
 
             log(`findBySlug: ${slug} - Found in DB. Status: ${listing.status}`);
 
-            const isPubliclyVisible = [BusinessStatus.APPROVED, BusinessStatus.PENDING].includes(listing.status);
+            const isPubliclyVisible = listing.status === BusinessStatus.APPROVED;
             if (!isPubliclyVisible) {
                 const isOwner = user && listing.vendor && listing.vendor.userId === user.id;
                 const isAdmin = user && (user.role === UserRole.ADMIN || user.role === UserRole.SUPERADMIN);

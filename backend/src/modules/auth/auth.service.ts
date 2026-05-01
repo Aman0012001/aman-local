@@ -93,10 +93,11 @@ export class AuthService {
     async register(registerDto: RegisterDto): Promise<{ user: User; tokens: JwtTokens }> {
         const { email, password, fullName, phone } = registerDto;
 
-        // Check if user already exists
-        const existingUser = await this.userRepository.findOne({
-            where: { email },
-        });
+        // Check if user already exists (case-insensitive)
+        const existingUser = await this.userRepository
+            .createQueryBuilder('user')
+            .where('LOWER(user.email) = LOWER(:email)', { email })
+            .getOne();
 
         if (existingUser) {
             throw new ConflictException('User with this email already exists');
@@ -107,7 +108,7 @@ export class AuthService {
 
         // Create user in database
         const user = this.userRepository.create({
-            email,
+            email: email.toLowerCase(), // Store emails in lowercase
             password: hashedPassword,
             fullName,
             phone,
@@ -119,7 +120,7 @@ export class AuthService {
 
         const savedUser = await this.userRepository.save(user);
 
-        // Auto-create affiliate record for vendors
+        // Auto-create vendor profile and affiliate record for vendors
         if (savedUser.role === UserRole.VENDOR) {
             const vendor = this.vendorRepository.create({
                 userId: savedUser.id,
@@ -136,13 +137,9 @@ export class AuthService {
             this.logger.log(`Auto-created affiliate record for vendor ${savedUser.id}`);
         }
 
-        // Generate tokens
         const tokens = await this.generateTokens(savedUser);
-
-        // Remove sensitive data
         delete savedUser.password;
 
-        // Handle referral if provided
         if (registerDto.referralCode && savedUser.role === UserRole.VENDOR) {
             await this.handleReferral(registerDto.referralCode, savedUser.id);
         }
@@ -156,17 +153,18 @@ export class AuthService {
     async login(loginDto: LoginDto): Promise<{ user: User; tokens: JwtTokens }> {
         const { email, password } = loginDto;
 
-        // Find user in database with password
+        // Find user in database with password (case-insensitive email)
         const user = await this.userRepository
             .createQueryBuilder('user')
             .addSelect('user.password')
             .leftJoinAndSelect('user.vendor', 'vendor')
             .leftJoinAndSelect('vendor.subscriptions', 'subscriptions')
             .leftJoinAndSelect('subscriptions.plan', 'plan')
-            .where('user.email = :email AND user.isActive = :isActive', { email, isActive: true })
+            .where('LOWER(user.email) = LOWER(:email) AND user.isActive = :isActive', { email, isActive: true })
             .getOne();
 
         if (!user) {
+            this.logger.warn(`Login failed: User not found or inactive for email: ${email}`);
             throw new UnauthorizedException('Invalid credentials');
         }
 
