@@ -68,28 +68,36 @@ export default function AdminDashboard() {
             value: stats?.totalUsers || '0',
             icon: Users,
             color: 'bg-gradient-to-br from-[#EE4444] to-[#CC2222]',
-            accentColor: 'bg-white/10'
+            textColor: 'text-white',
+            accentColor: 'bg-white/10',
+            shadow: 'shadow-red-500/20'
         },
         {
             label: 'Total Businesses',
             value: stats?.totalBusinesses || '0',
             icon: Briefcase,
             color: 'bg-gradient-to-br from-[#3366CC] to-[#1144AA]',
-            accentColor: 'bg-white/10'
+            textColor: 'text-white',
+            accentColor: 'bg-white/10',
+            shadow: 'shadow-blue-500/20'
         },
         {
             label: 'Total Reviews',
             value: stats?.totalReviews || '0',
             icon: MessageSquare,
             color: 'bg-gradient-to-br from-[#33AA88] to-[#118866]',
-            accentColor: 'bg-white/10'
+            textColor: 'text-white',
+            accentColor: 'bg-white/10',
+            shadow: 'shadow-emerald-500/20'
         },
         {
             label: 'Pending Verification',
             value: stats?.pendingBusinesses || '0',
             icon: ShieldAlert,
             color: 'bg-gradient-to-br from-[#FFAA33] to-[#FF8811]',
-            accentColor: 'bg-white/10'
+            textColor: 'text-white',
+            accentColor: 'bg-white/10',
+            shadow: 'shadow-orange-500/20'
         },
     ];
 
@@ -104,7 +112,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Global Stats */}
-            <StatsGrid stats={mappedStats} />
+            <StatsGrid stats={mappedStats as any} />
 
             <div className="grid lg:grid-cols-2 gap-8">
                 {/* Recent Businesses / Vendor Requests */}
