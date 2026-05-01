@@ -112,7 +112,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Global Stats */}
-            <StatsGrid stats={mappedStats} />
+            <StatsGrid stats={mappedStats as any} />
 
             <div className="grid lg:grid-cols-2 gap-8">
                 {/* Recent Businesses / Vendor Requests */}

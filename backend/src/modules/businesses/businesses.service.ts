@@ -334,11 +334,11 @@ export class BusinessesService {
                 minute: '2-digit',
             });
 
+            // Use the already joined businessHours alias if possible, or add a filter join
             queryBuilder
-                .leftJoin('listing.businessHours', 'bh')
-                .andWhere('bh.dayOfWeek = :day', { day })
-                .andWhere('bh.isOpen = :isOpen', { isOpen: true })
-                .andWhere(':time BETWEEN bh.openTime AND bh.closeTime', {
+                .andWhere('businessHours.dayOfWeek = :day', { day })
+                .andWhere('businessHours.isOpen = :isOpen', { isOpen: true })
+                .andWhere(':time BETWEEN businessHours.openTime AND businessHours.closeTime', {
                     time,
                 });
         }

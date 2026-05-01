@@ -3,13 +3,13 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 const sharedPoolOptions = {
     // Increased stability for remote DB (Railway)
-    max: 10,
-    min: 2,
+    max: 20, // Increased from 10 to handle more concurrent search requests
+    min: 5,
     idleTimeoutMillis: 30000, 
     connectionTimeoutMillis: 30000,
     // Prevents hanging queries from blocking the pool
-    statement_timeout: 45000, // 45s max per query
-    query_timeout: 45000,
+    statement_timeout: 60000, // Increased to 60s for complex search joins
+    query_timeout: 60000,
     // TCP Keepalive to prevent firewalls/Railway from dropping idle sockets
     keepAlive: true,
     keepAliveInitialDelayMillis: 10000, 
@@ -36,6 +36,8 @@ export const typeOrmConfig = (
             type: 'postgres',
             url,
             entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+            migrations: [__dirname + '/../migrations/**/*{.ts,.js}'],
+            migrationsRun: configService.get('NODE_ENV') === 'production',
             synchronize: sync,
             logging,
             ssl: sslConfig,
@@ -54,6 +56,8 @@ export const typeOrmConfig = (
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_DATABASE'),
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+        migrations: [__dirname + '/../migrations/**/*{.ts,.js}'],
+        migrationsRun: configService.get('NODE_ENV') === 'production',
         synchronize: sync,
         logging,
         ssl: sslConfig,
