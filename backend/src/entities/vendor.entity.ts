@@ -49,6 +49,9 @@ export class Vendor {
     @Column({ name: 'ntn_number', nullable: true, length: 15 })
     ntnNumber: string;
 
+    @Column({ length: 100, default: 'Pakistan', nullable: true })
+    country: string;
+
     @Column({ name: 'is_verified', default: false })
     isVerified: boolean;
 

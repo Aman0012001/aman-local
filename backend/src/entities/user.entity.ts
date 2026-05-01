@@ -131,6 +131,13 @@ export class User {
     @UpdateDateColumn({ name: 'updated_at' })
     updatedAt: Date;
 
+    @Column({ name: 'deletion_scheduled_at', nullable: true, type: 'timestamp' })
+    @Index()
+    deletionScheduledAt: Date;
+
+    @Column({ name: 'trust_score', type: 'int', default: 100 })
+    trustScore: number;
+
     // ── Relations ─────────────────────────────────────────────────────────────
 
     @OneToOne(() => Vendor, (vendor) => vendor.user)
