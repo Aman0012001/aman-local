@@ -8,6 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, Not, Brackets, Like, MoreThan } from 'typeorm';
 import { Listing, BusinessStatus } from '../../entities/business.entity';
+import { ListingView } from '../../entities/listing-view.entity';
 import { BusinessHours, DayOfWeek } from '../../entities/business-hours.entity';
 import { BusinessAmenity } from '../../entities/business-amenity.entity';
 import { Amenity } from '../../entities/amenity.entity';
@@ -35,6 +36,8 @@ export class BusinessesService {
     constructor(
         @InjectRepository(Listing)
         private listingRepository: Repository<Listing>,
+        @InjectRepository(ListingView)
+        private readonly listingViewRepository: Repository<ListingView>,
         @InjectRepository(BusinessHours)
         private businessHoursRepository: Repository<BusinessHours>,
         @InjectRepository(BusinessAmenity)
@@ -454,6 +457,12 @@ export class BusinessesService {
         const isOwner = user && listing.vendor?.user?.id === user.id;
         if (!isOwner) {
             await this.listingRepository.increment({ id }, 'totalViews', 1);
+            // Log view for analytics
+            this.listingViewRepository.save({
+                listingId: id,
+                userId: user?.id,
+            }).catch(err => console.error('[BusinessesService] View log error:', err));
+            
             listing.totalViews = (listing.totalViews || 0) + 1;
         }
 
@@ -510,6 +519,12 @@ export class BusinessesService {
             const isOwner = user && listing.vendor?.user?.id === user.id;
             if (!isOwner) {
                 await this.listingRepository.increment({ id: listing.id }, 'totalViews', 1);
+                // Log view for analytics
+                this.listingViewRepository.save({
+                    listingId: listing.id,
+                    userId: user?.id,
+                }).catch(err => console.error('[BusinessesService] View log error:', err));
+                
                 listing.totalViews = (listing.totalViews || 0) + 1;
             }
 

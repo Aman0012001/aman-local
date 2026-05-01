@@ -11,6 +11,7 @@ export * from './business.entity';
 export * from './business-hours.entity';
 export * from './amenity.entity';
 export * from './business-amenity.entity';
+export * from './listing-view.entity';
 
 // Reviews
 export * from './review.entity';

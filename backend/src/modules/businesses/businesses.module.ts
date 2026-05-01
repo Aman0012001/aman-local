@@ -15,6 +15,7 @@ import { AffiliateModule } from '../affiliate/affiliate.module';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { Subscription } from '../../entities/subscription.entity';
 import { SubscriptionPlan } from '../../entities/subscription-plan.entity';
+import { ListingView } from '../../entities/listing-view.entity';
 
 import { ActivePlan } from '../../entities/active-plan.entity';
 
@@ -30,6 +31,7 @@ import { ActivePlan } from '../../entities/active-plan.entity';
             ActivePlan,
             Subscription,
             SubscriptionPlan,
+            ListingView,
         ]),
         NotificationsModule,
         SearchModule,

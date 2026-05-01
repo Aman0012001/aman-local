@@ -68,8 +68,15 @@ export class LeadsController {
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Get lead statistics for the current vendor' })
     @ApiResponse({ status: 200, description: 'Stats retrieved successfully' })
-    async getStats(@CurrentUser() user: User) {
-        return this.leadsService.getVendorLeadStats(user.id);
+    async getStats(
+        @CurrentUser() user: User,
+        @Query('period') period?: string
+    ) {
+        let days = 7;
+        if (period === '30d') days = 30;
+        else if (period === '90d') days = 90;
+        
+        return this.leadsService.getVendorLeadStats(user.id, days);
     }
 
     @Get(':id')

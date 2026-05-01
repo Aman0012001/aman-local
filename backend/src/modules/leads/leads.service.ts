@@ -10,6 +10,7 @@ import { Lead, LeadStatus } from '../../entities/lead.entity';
 import { Listing } from '../../entities/business.entity';
 import { Vendor } from '../../entities/vendor.entity';
 import { User, UserRole } from '../../entities/user.entity';
+import { ListingView } from '../../entities/listing-view.entity';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { UpdateLeadStatusDto } from './dto/update-lead-status.dto';
 import { GetLeadsDto } from './dto/get-leads.dto';
@@ -30,6 +31,8 @@ export class LeadsService {
         private readonly listingRepository: Repository<Listing>,
         @InjectRepository(Vendor)
         private vendorRepository: Repository<Vendor>,
+        @InjectRepository(ListingView)
+        private readonly listingViewRepository: Repository<ListingView>,
         private notificationsGateway: NotificationsGateway,
         private notificationsService: NotificationsService,
     ) { }
@@ -274,9 +277,9 @@ export class LeadsService {
     }
 
     /**
-     * Get basic stats for a vendor
+     * Get basic stats for a vendor including daily trends
      */
-    async getVendorLeadStats(userId: string) {
+    async getVendorLeadStats(userId: string, days: number = 7) {
         let vendor = await this.vendorRepository.findOne({
             where: { userId },
         });
@@ -297,7 +300,8 @@ export class LeadsService {
             }
         }
 
-        const stats = await this.leadRepository
+        // 1. Get status-based stats (current logic)
+        const statusStats = await this.leadRepository
             .createQueryBuilder('lead')
             .innerJoin('lead.business', 'business')
             .select('lead.status', 'status')
@@ -306,10 +310,60 @@ export class LeadsService {
             .groupBy('lead.status')
             .getRawMany();
 
-        return stats.reduce((acc, curr) => {
+        const result = statusStats.reduce((acc, curr) => {
             acc[curr.status] = parseInt(curr.count);
             return acc;
         }, {});
+
+        // 2. Get daily trends for the chart
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - days);
+        startDate.setHours(0, 0, 0, 0);
+
+        // Daily Leads
+        const dailyLeadsRaw = await this.leadRepository.createQueryBuilder('lead')
+            .innerJoin('lead.business', 'business')
+            .select("DATE_TRUNC('day', lead.createdAt)", 'day')
+            .addSelect('COUNT(*)', 'count')
+            .where('business.vendorId = :vendorId', { vendorId: vendor.id })
+            .andWhere('lead.createdAt >= :startDate', { startDate })
+            .groupBy('day')
+            .orderBy('day', 'ASC')
+            .getRawMany();
+
+        // Daily Views
+        const dailyViewsRaw = await this.listingViewRepository.createQueryBuilder('view')
+            .innerJoin('view.listing', 'business')
+            .select("DATE_TRUNC('day', view.createdAt)", 'day')
+            .addSelect('COUNT(*)', 'count')
+            .where('business.vendorId = :vendorId', { vendorId: vendor.id })
+            .andWhere('view.createdAt >= :startDate', { startDate })
+            .groupBy('day')
+            .orderBy('day', 'ASC')
+            .getRawMany();
+
+        // Format into a map for easy lookup
+        const leadsMap = new Map(dailyLeadsRaw.map(l => [new Date(l.day).toDateString(), parseInt(l.count)]));
+        const viewsMap = new Map(dailyViewsRaw.map(v => [new Date(v.day).toDateString(), parseInt(v.count)]));
+
+        // Generate the trend array for the requested period
+        const dailyTrend = [];
+        const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        for (let i = 0; i < days; i++) {
+            const date = new Date();
+            date.setDate(date.getDate() - (days - 1 - i));
+            const dateStr = date.toDateString();
+            
+            dailyTrend.push({
+                day: days > 7 ? `${date.getDate()}/${date.getMonth() + 1}` : daysOfWeek[date.getDay()],
+                views: viewsMap.get(dateStr) || 0,
+                leads: leadsMap.get(dateStr) || 0,
+            });
+        }
+
+        result['dailyTrend'] = dailyTrend;
+        return result;
     }
     /**
      * Vendor replies to a user enquiry
