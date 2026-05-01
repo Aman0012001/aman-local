@@ -6,7 +6,7 @@ import BusinessDetailClient from './BusinessDetailClient';
 export async function generateStaticParams() {
     try {
         // Robust search with basic fallback
-        const response = await api.listings.search({ limit: 1000 });
+        const response = await api.listings.search({ limit: 500 });
         const businesses = (response && Array.isArray(response.data)) ? response.data : [];
         
         const params = businesses
