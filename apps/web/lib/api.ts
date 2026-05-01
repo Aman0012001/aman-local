@@ -95,17 +95,20 @@ async function fetcher<T>(endpoint: string, options?: FetcherOptions): Promise<T
         ));
 
         if (isNetworkError) {
-            console.error('[api.ts] Network Error Details:', {
+            console.error('[api.ts] Network Error details:', {
                 message: error.message,
-                name: error.name,
-                url: `${API_BASE_URL}${endpoint}`,
+                url: url,
+                method: options?.method || 'GET',
                 stack: error.stack,
-                apiUrlSet: API_BASE_URL,
+                // These keys are common in Firefox/Chrome network errors
+                name: error.name,
+                fileName: (error as any).fileName,
+                lineNumber: (error as any).lineNumber
             });
-            // Try to log the keys of the error object just in case
-            console.error('[api.ts] Network Error Object Keys:', Object.getOwnPropertyNames(error));
 
-            throw new Error(`Connection Failed: Unable to reach the backend at ${API_BASE_URL}. Ensure the server is running and CORS is allowed. Error: ${error.message}`);
+            throw new Error(`Connection Failed: Unable to reach the backend at ${url}. ` +
+                `This usually means the server is down, there's a CORS mismatch, or the connection was reset. ` +
+                `Technical error: ${error.message}`);
         }
 
         if (error.name === 'AbortError') {

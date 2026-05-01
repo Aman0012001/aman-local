@@ -882,3 +882,12 @@ NotFoundException: Listing not found
 [2026-05-01T13:10:04.480Z] findBySlug: dev-vendor-listing2-mnvspqxo (User: Public)
 [2026-05-01T13:10:04.883Z] findBySlug: dev-vendor-listing2-mnvspqxo - Found in DB. Status: approved
 [2026-05-01T13:10:05.041Z] findBySlug: dev-vendor-listing2-mnvspqxo - SUCCESS
+[2026-05-01T22:47:38.365Z] findBySlug: test-mnh4cfax (User: dd@gmail.com)
+[2026-05-01T22:47:39.620Z] findBySlug: test-mnh4cfax - Found in DB. Status: approved
+[2026-05-01T22:47:40.013Z] findBySlug: test-mnh4cfax - SUCCESS
+[2026-05-01T22:57:54.147Z] findBySlug: test-mnh4cfax (User: dd@gmail.com)
+[2026-05-01T22:57:55.380Z] findBySlug: test-mnh4cfax - Found in DB. Status: approved
+[2026-05-01T22:57:55.786Z] findBySlug: test-mnh4cfax - SUCCESS
+[2026-05-01T23:00:24.955Z] findBySlug: test-mnh4cfax (User: dd@gmail.com)
+[2026-05-01T23:00:26.414Z] findBySlug: test-mnh4cfax - Found in DB. Status: approved
+[2026-05-01T23:00:26.837Z] findBySlug: test-mnh4cfax - SUCCESS

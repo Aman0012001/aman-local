@@ -103,11 +103,10 @@ const BusinessOpenBadge = ({ business }: { business: Business }) => {
   return (
     <span
       title={todayHours ? `Today: ${todayHours}` : undefined}
-      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border shadow-sm ${
-        isOpen
-          ? "bg-green-50 text-green-700 border-green-200"
-          : "bg-slate-100 text-slate-600 border-slate-200"
-      }`}
+      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border shadow-sm ${isOpen
+        ? "bg-green-50 text-green-700 border-green-200"
+        : "bg-slate-100 text-slate-600 border-slate-200"
+        }`}
     >
       <Clock className="w-3.5 h-3.5" />
       {todayHours ? `${todayHours} (${label})` : label}
@@ -385,7 +384,7 @@ export default function BusinessDetailClient({
           if (user) {
             try {
               await api.affiliate.trackClick(refCode);
-            } catch (e) {}
+            } catch (e) { }
           } else {
             // Store in session storage for later if not logged in
             sessionStorage.setItem("referralCode", refCode);
@@ -1288,40 +1287,40 @@ export default function BusinessDetailClient({
                         </h3>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
                           {business.businessAmenities &&
-                          business.businessAmenities.length > 0
+                            business.businessAmenities.length > 0
                             ? business.businessAmenities.map((item, idx) => (
-                                <div
-                                  key={item.id || `amenity-${idx}`}
-                                  className="flex items-center gap-3"
-                                >
-                                  <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
-                                    <CheckCircle2 className="w-5 h-5" />
-                                  </div>
-                                  <span className="font-bold text-slate-700">
-                                    {item.amenity.name}
-                                  </span>
+                              <div
+                                key={item.id || `amenity-${idx}`}
+                                className="flex items-center gap-3"
+                              >
+                                <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+                                  <CheckCircle2 className="w-5 h-5" />
                                 </div>
-                              ))
+                                <span className="font-bold text-slate-700">
+                                  {item.amenity.name}
+                                </span>
+                              </div>
+                            ))
                             : [
-                                "Free WiFi",
-                                "Parking Space",
-                                "Accepts Cards",
-                                "Air Conditioned",
-                                "Wheelchair Access",
-                                "Outdoor Seating",
-                              ].map((item) => (
-                                <div
-                                  key={item}
-                                  className="flex items-center gap-3"
-                                >
-                                  <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
-                                    <CheckCircle2 className="w-5 h-5" />
-                                  </div>
-                                  <span className="font-bold text-slate-700">
-                                    {item}
-                                  </span>
+                              "Free WiFi",
+                              "Parking Space",
+                              "Accepts Cards",
+                              "Air Conditioned",
+                              "Wheelchair Access",
+                              "Outdoor Seating",
+                            ].map((item) => (
+                              <div
+                                key={item}
+                                className="flex items-center gap-3"
+                              >
+                                <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+                                  <CheckCircle2 className="w-5 h-5" />
                                 </div>
-                              ))}
+                                <span className="font-bold text-slate-700">
+                                  {item}
+                                </span>
+                              </div>
+                            ))}
                         </div>
                       </div>
                     </div>
@@ -1653,7 +1652,7 @@ export default function BusinessDetailClient({
                                 title={
                                   link.platform ||
                                   platform.charAt(0).toUpperCase() +
-                                    platform.slice(1)
+                                  platform.slice(1)
                                 }
                               >
                                 <Icon className="w-4 h-4" />
@@ -1747,11 +1746,11 @@ export default function BusinessDetailClient({
                       <span className="font-black text-slate-900">
                         {business.vendor?.user?.createdAt
                           ? new Date(
-                              business.vendor.user.createdAt,
-                            ).toLocaleDateString("en-US", {
-                              month: "short",
-                              year: "numeric",
-                            })
+                            business.vendor.user.createdAt,
+                          ).toLocaleDateString("en-US", {
+                            month: "short",
+                            year: "numeric",
+                          })
                           : "Oct 2024"}
                       </span>
                     </div>
@@ -1777,7 +1776,7 @@ export default function BusinessDetailClient({
                           // Fallback to business hours
                           const hoursData =
                             business.businessHours &&
-                            business.businessHours.length > 0
+                              business.businessHours.length > 0
                               ? business.businessHours
                               : business.vendor?.businessHours;
                           const { todayHours } =
@@ -1789,10 +1788,10 @@ export default function BusinessDetailClient({
 
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-bold text-slate-400 uppercase tracking-widest text-[9px]">
-                        Response Rate
+                        {/* Response Rate */}
                       </span>
                       <span className="font-black text-emerald-600">
-                        98% High
+                        {/* 98% High */}
                       </span>
                     </div>
 
@@ -1868,11 +1867,10 @@ export default function BusinessDetailClient({
 
                   {/* Type chip */}
                   <span
-                    className={`self-start inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
-                      offer.type === "event"
-                        ? "bg-blue-50 text-blue-600"
-                        : "bg-orange-50 text-orange-600"
-                    }`}
+                    className={`self-start inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${offer.type === "event"
+                      ? "bg-blue-50 text-blue-600"
+                      : "bg-orange-50 text-orange-600"
+                      }`}
                   >
                     {offer.type === "event" ? (
                       <Calendar className="w-3 h-3" />

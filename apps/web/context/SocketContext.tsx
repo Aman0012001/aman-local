@@ -14,7 +14,13 @@ const SocketContext = createContext<SocketContextType>({
     connected: false
 });
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || (process.env.NEXT_PUBLIC_API_URL ? process.env.NEXT_PUBLIC_API_URL.replace('/api/v1', '') : 'http://localhost:3001');
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 
+    (process.env.NEXT_PUBLIC_API_URL 
+        ? process.env.NEXT_PUBLIC_API_URL.replace('/api/v1', '') 
+        : 'http://127.0.0.1:3001');
+
+// Append the namespace required by the backend gateway
+const NAMESPACED_SOCKET_URL = `${SOCKET_URL.endsWith('/') ? SOCKET_URL.slice(0, -1) : SOCKET_URL}/notifications`;
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     const { user } = useAuth();
@@ -40,13 +46,17 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
             return;
         }
 
-        console.log('[SocketContext] Attempting connection to:', SOCKET_URL);
+        console.log('[SocketContext] Attempting connection to:', NAMESPACED_SOCKET_URL);
+        
+        // Use 127.0.0.1 instead of localhost if needed to bypass IPv6 resolution issues in some browsers
+        const connectionUrl = NAMESPACED_SOCKET_URL.replace('localhost', '127.0.0.1');
 
-        const newSocket = io(SOCKET_URL, {
+        const newSocket = io(connectionUrl, {
             auth: { token: `Bearer ${token}` },
             transports: ['polling', 'websocket'],
             reconnectionAttempts: 10,
             reconnectionDelay: 1000,
+            timeout: 20000, // 20s timeout
         });
 
         newSocket.on('connect', () => {
@@ -65,7 +75,12 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         });
 
         newSocket.on('connect_error', (error) => {
-            console.error('[SocketContext] Connection error:', error);
+            console.error('[SocketContext] Connection error details:', {
+                message: error.message,
+                description: (error as any).description,
+                context: (error as any).context,
+                type: error.name
+            });
             setConnected(false);
         });
 

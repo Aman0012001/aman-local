@@ -214,7 +214,7 @@ export class OffersService {
                     now
                 })
                 .where('o.isActive = :isActive', { isActive: true })
-                .andWhere('o.status != :expired', { expired: OfferStatus.EXPIRED })
+                .andWhere('o.status::text != :expired', { expired: OfferStatus.EXPIRED })
                 .andWhere('(o.expiryDate IS NULL OR o.expiryDate > :now)', { now })
                 .andWhere('(o.endDate IS NULL OR o.endDate > :now)', { now });
 
@@ -231,7 +231,7 @@ export class OffersService {
             }
 
             if (type) {
-                qb.andWhere('o.type = :type', { type });
+                qb.andWhere('o.type::text = :type', { type });
             }
 
             if (categoryId) {
@@ -241,12 +241,12 @@ export class OffersService {
             // Placement logic
             if (placement) {
                 // STRICT: Only show offers specifically boosted for this placement
-                // We no longer include o.isFeatured automatically here to give 
-                // priority to paid placement slots on the homepage.
-                qb.andWhere('o.placements @> :p', { p: JSON.stringify([placement]) });
+                qb.andWhere('o.placements IS NOT NULL AND o.placements @> :p::jsonb', { 
+                    p: JSON.stringify([placement]) 
+                });
             } else if (isFeatured === true) {
                 // Return only featured (either via old boolean or new placement system)
-                qb.andWhere('(o.isFeatured = :trueVal OR o.placements @> :hp OR o.placements @> :catP)', {
+                qb.andWhere('(o.isFeatured = :trueVal OR (o.placements IS NOT NULL AND (o.placements @> :hp::jsonb OR o.placements @> :catP::jsonb)))', {
                     trueVal: true,
                     hp: JSON.stringify(['homepage']),
                     catP: JSON.stringify(['category'])
@@ -255,7 +255,7 @@ export class OffersService {
 
             // Ranking & Ordering
             // 1. New Booking Boost (Listing placement)
-            qb.addSelect("CASE WHEN pb.placements @> :listingP THEN 1 ELSE 0 END", "boosted");
+            qb.addSelect("CASE WHEN pb.placements IS NOT NULL AND pb.placements @> :listingP::jsonb THEN 1 ELSE 0 END", "boosted");
             qb.setParameters({ listingP: JSON.stringify(['listing']) });
 
             if (latitude && longitude) {
@@ -344,20 +344,38 @@ export class OffersService {
 
     /** Public: get active/scheduled offers for a business (max 6) */
     async findPublicByBusiness(businessId: string): Promise<OfferEvent[]> {
+        console.log(`[OffersService] findPublicByBusiness called for: ${businessId}`);
         const now = new Date();
-        const offers = await this.offerRepository.createQueryBuilder('o')
-            .where('o.businessId = :businessId', { businessId })
-            .andWhere('o.isActive = :isActive', { isActive: true })
-            .andWhere('o.status != :expired', { expired: OfferStatus.EXPIRED })
-            .andWhere('(o.expiryDate IS NULL OR o.expiryDate > :now)', { now })
-            .andWhere('(o.endDate IS NULL OR o.endDate > :now)', { now })
-            .andWhere('o.placements @> :p', { p: JSON.stringify(['listing']) })
-            .orderBy('o.isFeatured', 'DESC')
-            .addOrderBy('o.createdAt', 'DESC')
-            .take(20)
-            .getMany();
 
-        return offers.map(o => this.computeStatus(o));
+        try {
+            // Using .limit() instead of .take() because there are no joins.
+            // .take() uses a more complex subquery approach which can sometimes cause 
+            // connection issues or timeouts on unstable DB connections.
+            const offers = await this.offerRepository.createQueryBuilder('o')
+                .where('o.businessId = :businessId', { businessId })
+                .andWhere('o.isActive = :isActive', { isActive: true })
+                .andWhere('o.status::text != :expired', { expired: OfferStatus.EXPIRED })
+                .andWhere('(o.expiryDate IS NULL OR o.expiryDate > :now)', { now })
+                .andWhere('(o.endDate IS NULL OR o.endDate > :now)', { now })
+                // Explicitly cast to jsonb to prevent driver-level type inference issues
+                .andWhere('o.placements IS NOT NULL AND o.placements @> :p::jsonb', { 
+                    p: JSON.stringify(['listing']) 
+                })
+                .orderBy('o.isFeatured', 'DESC')
+                .addOrderBy('o.createdAt', 'DESC')
+                .limit(20)
+                .getMany();
+
+            console.log(`[OffersService] Successfully fetched ${offers.length} offers for business ${businessId}`);
+            return offers.map(o => this.computeStatus(o));
+        } catch (error) {
+            console.error(`[OffersService] CRITICAL: findPublicByBusiness failed for ${businessId}:`, {
+                message: error.message,
+                code: error.code,
+                stack: error.stack
+            });
+            throw error;
+        }
     }
 
     /** Public: get a single offer/event by ID */

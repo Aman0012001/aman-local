@@ -246,28 +246,26 @@ export class BusinessesService {
             }
         }
 
-        const queryBuilder = this.listingRepository
+        // STEP 1: Get the IDs of the businesses that match the filters
+        // This query is much lighter because it doesn't join one-to-many collections 
+        // and doesn't select all columns, avoiding complex subqueries in pagination.
+        const idQueryBuilder = this.listingRepository
             .createQueryBuilder('listing')
-            .leftJoinAndSelect('listing.category', 'category')
-            .leftJoinAndSelect('listing.vendor', 'vendor')
-            .leftJoinAndSelect('vendor.user', 'user')
-            .leftJoinAndSelect('listing.businessHours', 'businessHours')
-            .leftJoinAndSelect('listing.businessAmenities', 'businessAmenities')
-            .leftJoinAndSelect('businessAmenities.amenity', 'amenity')
+            .select('listing.id', 'id')
+            .leftJoin('listing.category', 'category')
+            .leftJoin('listing.vendor', 'vendor')
             .where('listing.status = :status', { status: BusinessStatus.APPROVED })
-            .andWhere('(category.id IS NULL OR category.status = :catStatus)', { catStatus: CategoryStatus.ACTIVE });
+            .andWhere('(category.id IS NULL OR category.status::text = :catStatus)', { 
+                catStatus: CategoryStatus.ACTIVE 
+            })
+            .groupBy('listing.id');
 
-        // Apply Search Results from Elasticsearch or fallback to ILIKE
+        // Apply filters to the ID query
         if (esIds && esIds.length > 0) {
-            queryBuilder.andWhere('listing.id IN (:...esIds)', { esIds });
-            // If relevance sorting requested, use ES order
-            if (sortBy === SearchSortBy.RELEVANCE) {
-                queryBuilder.orderBy(`array_position(ARRAY['${esIds.join("','")}']::uuid[], listing.id)`, 'ASC');
-            }
+            idQueryBuilder.andWhere('listing.id IN (:...esIds)', { esIds });
         } else if (searchDto.query) {
-            // Text search fallback — matches title, description and vendor/admin-added search keywords
             const searchTerms = searchDto.query.toLowerCase().split(' ').filter(term => term.length > 0);
-            queryBuilder.andWhere(new Brackets((qb) => {
+            idQueryBuilder.andWhere(new Brackets((qb) => {
                 for (let i = 0; i < searchTerms.length; i++) {
                     const term = searchTerms[i];
                     qb.andWhere(
@@ -284,113 +282,108 @@ export class BusinessesService {
             }));
         }
 
-        // Category filter
         if (searchDto.categoryId) {
-            queryBuilder.andWhere('category.id = :categoryId', {
-                categoryId: searchDto.categoryId,
-            });
+            idQueryBuilder.andWhere('category.id = :categoryId', { categoryId: searchDto.categoryId });
         }
-
         if (searchDto.categorySlug) {
-            queryBuilder.andWhere('category.slug = :categorySlug', {
-                categorySlug: searchDto.categorySlug,
-            });
+            idQueryBuilder.andWhere('category.slug = :categorySlug', { categorySlug: searchDto.categorySlug });
         }
-
-        // City filter
         if (city) {
-            queryBuilder.andWhere('listing.city ILIKE :city', {
-                city: `%${city}%`,
-            });
+            idQueryBuilder.andWhere('listing.city ILIKE :city', { city: `%${city}%` });
         }
-
-        // Rating filter
         if (minRating) {
-            queryBuilder.andWhere('listing.averageRating >= :minRating', {
-                minRating,
-            });
+            idQueryBuilder.andWhere('listing.averageRating >= :minRating', { minRating });
         }
-
-        // Price range filter
         if (priceRange) {
-            queryBuilder.andWhere('listing.priceRange = :priceRange', {
-                priceRange,
-            });
+            idQueryBuilder.andWhere('listing.priceRange = :priceRange', { priceRange });
         }
-
-        // Featured only
         if (featuredOnly) {
-            queryBuilder.andWhere('listing.isFeatured = :featured', { featured: true });
+            idQueryBuilder.andWhere('listing.isFeatured = :featured', { featured: true });
         }
         if (verifiedOnly) {
-            queryBuilder.andWhere('listing.isVerified = :verified', { verified: true });
+            idQueryBuilder.andWhere('listing.isVerified = :verified', { verified: true });
         }
 
-        // Open Now filter
+        // Open Now filter (requires join, but only for filtering)
         if (openNow) {
             const now = new Date();
-            const day = now
-                .toLocaleDateString('en-US', { weekday: 'long' })
-                .toLowerCase();
-            const time = now.toLocaleTimeString('en-US', {
-                hour12: false,
-                hour: '2-digit',
-                minute: '2-digit',
-            });
-
-            // Use the already joined businessHours alias if possible, or add a filter join
-            queryBuilder
-                .andWhere('businessHours.dayOfWeek = :day', { day })
-                .andWhere('businessHours.isOpen = :isOpen', { isOpen: true })
-                .andWhere(':time BETWEEN businessHours.openTime AND businessHours.closeTime', {
-                    time,
-                });
+            const day = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+            const time = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+            
+            idQueryBuilder
+                .leftJoin('listing.businessHours', 'filterHours')
+                .andWhere('filterHours.dayOfWeek = :day', { day })
+                .andWhere('filterHours.isOpen = :isOpen', { isOpen: true })
+                .andWhere(':time BETWEEN filterHours.openTime AND filterHours.closeTime', { time });
         }
 
-        // Sorting
-        // 1) Keyword boost: if the query matches a vendor's metaKeywords, rank that listing first
+        // Sorting & Pagination on IDs
         if (searchDto.query) {
-            queryBuilder.addSelect(
+            idQueryBuilder.addSelect(
                 'CASE WHEN "listing"."search_keywords"::text ILIKE :queryBoost THEN 0 WHEN "listing"."meta_keywords" ILIKE :queryBoost THEN 1 ELSE 2 END',
-                'boost',
+                'boost'
             );
-            queryBuilder.setParameter('queryBoost', `%${searchDto.query}%`);
-            queryBuilder.addOrderBy('boost', 'ASC');
+            idQueryBuilder.setParameter('queryBoost', `%${searchDto.query}%`);
+            idQueryBuilder.addOrderBy('boost', 'ASC');
+            idQueryBuilder.addGroupBy('boost');
         }
 
-        // 2) Secondary sort (user-selected or default relevance)
         switch (sortBy) {
-            case SearchSortBy.DISTANCE:
-                if (latitude && longitude) {
-                    queryBuilder.addOrderBy('distance', 'ASC');
-                }
-                break;
             case SearchSortBy.RATING:
-                queryBuilder.addOrderBy('listing.averageRating', 'DESC');
+                idQueryBuilder.addOrderBy('listing.averageRating', 'DESC');
+                idQueryBuilder.addGroupBy('listing.averageRating');
                 break;
             case 'newest':
-                queryBuilder.addOrderBy('listing.createdAt', 'DESC');
+                idQueryBuilder.addOrderBy('listing.createdAt', 'DESC');
+                idQueryBuilder.addGroupBy('listing.createdAt');
                 break;
             default:
-                // Relevance (sponsored > featured > rating)
-                queryBuilder
+                idQueryBuilder
                     .addOrderBy('listing.isSponsored', 'DESC')
                     .addOrderBy('listing.isFeatured', 'DESC')
                     .addOrderBy('listing.averageRating', 'DESC');
+                
+                idQueryBuilder.addGroupBy('listing.isSponsored');
+                idQueryBuilder.addGroupBy('listing.isFeatured');
+                idQueryBuilder.addGroupBy('listing.averageRating');
         }
 
         try {
-            // Use getManyAndCount for better performance and reliability with skip/take
-            // This avoids complex subqueries that often fail in Postgres with many joins
-            const [entities, total] = await queryBuilder.skip(skip).take(limit).getManyAndCount();
+            // Get total count using a separate lightweight query
+            const total = await idQueryBuilder.getCount();
 
-            // Map and format results
-            const results = entities.map((listing) => {
-                // Add any additional formatting here if needed
-                return listing;
-            });
+            if (total === 0) {
+                return createPaginatedResponse([], page, limit, 0);
+            }
 
-            return createPaginatedResponse(results, page, limit, total);
+            // Get matching IDs using offset/limit which is more stable than skip/take
+            const idResults = await idQueryBuilder
+                .offset(skip)
+                .limit(limit)
+                .getRawMany();
+
+            const matchedIds = idResults.map(r => r.id);
+
+            // STEP 2: Fetch full entities for the matched IDs
+            // This query is very fast because it's a simple lookup by primary keys
+            const entities = await this.listingRepository
+                .createQueryBuilder('listing')
+                .leftJoinAndSelect('listing.category', 'category')
+                .leftJoinAndSelect('listing.vendor', 'vendor')
+                .leftJoinAndSelect('vendor.user', 'user')
+                .leftJoinAndSelect('listing.businessHours', 'businessHours')
+                .leftJoinAndSelect('listing.businessAmenities', 'businessAmenities')
+                .leftJoinAndSelect('businessAmenities.amenity', 'amenity')
+                .where('listing.id IN (:...matchedIds)', { matchedIds })
+                .getMany();
+
+            // Re-sort entities to match the order from the ID query
+            const idToEntity = new Map(entities.map(e => [e.id, e]));
+            const sortedResults = matchedIds
+                .map(id => idToEntity.get(id))
+                .filter(e => !!e);
+
+            return createPaginatedResponse(sortedResults, page, limit, total);
         } catch (error: any) {
             // Enhanced robust logging
             try {
