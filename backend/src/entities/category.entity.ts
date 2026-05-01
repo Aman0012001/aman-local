@@ -72,6 +72,10 @@ export class Category {
     @Column({ name: 'meta_description', nullable: true, type: 'text' })
     metaDescription: string;
 
+    @Column({ name: 'is_featured', default: false })
+    @Index()
+    isFeatured: boolean;
+
     @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;
 
