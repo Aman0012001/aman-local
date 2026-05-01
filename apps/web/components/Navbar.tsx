@@ -18,7 +18,7 @@ export default function Navbar() {
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
     // ── Web Push Notifications ───────────────────────────────────────
-    const { supported: pushSupported, permission: pushPermission, isSubscribed: pushSubscribed, subscribe: enablePush, loading: pushLoading } = usePushNotifications(user?.id, true);
+    const { supported: pushSupported, permission: pushPermission, isSubscribed: pushSubscribed, subscribe: enablePush, loading: pushLoading } = usePushNotifications(user?.id, false);
 
     // ── Notifications ───────────────────────────────────────────────
     const [notifications, setNotifications] = useState<any[]>([]);

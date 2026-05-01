@@ -44,7 +44,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
         const newSocket = io(SOCKET_URL, {
             auth: { token: `Bearer ${token}` },
-            transports: ['websocket'],
+            transports: ['polling', 'websocket'],
             reconnectionAttempts: 10,
             reconnectionDelay: 1000,
         });

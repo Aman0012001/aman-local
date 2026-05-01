@@ -17,7 +17,6 @@ import { User } from '../../entities/user.entity';
         origin: true,
         credentials: true,
     },
-    namespace: 'notifications',
     transports: ['polling', 'websocket'],
 })
 export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisconnect, OnModuleInit {
