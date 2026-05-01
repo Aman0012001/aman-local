@@ -14,7 +14,8 @@ interface StatItem {
     icon: any;
     color: string;
     textColor?: string;
-    accentColor: string;
+    accentColor?: string;
+    shadow?: string;
     onClick?: () => void;
 }
 
@@ -61,7 +62,7 @@ export default function StatsGrid({ stats = defaultStats }: StatsGridProps) {
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
             {stats.map((stat) => {
-                const isDarkBg = stat.color.includes('bg-slate-900') || stat.color.includes('bg-[#004a99]') || stat.color.includes('bg-emerald-500') || stat.color.includes('bg-amber-500');
+                const isDarkBg = stat.color.includes('bg-slate-900') || stat.color.includes('bg-[#004a99]') || stat.color.includes('bg-emerald-500') || stat.color.includes('bg-amber-500') || stat.color.includes('bg-gradient');
                 const defaultTextColor = isDarkBg ? 'text-white' : 'text-[#131b2e]';
                 const textColor = stat.textColor || defaultTextColor;
                 const labelColor = textColor === 'text-white' ? 'text-white/70' : 'text-[#64748b]';
@@ -70,9 +71,9 @@ export default function StatsGrid({ stats = defaultStats }: StatsGridProps) {
                     <div
                         key={stat.label}
                         onClick={stat.onClick}
-                        className={`${stat.color} rounded-[24px] p-8 border border-[#e5e7eb] shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col gap-4 group hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-500 ${stat.onClick ? 'cursor-pointer active:scale-95' : 'cursor-default'}`}
+                        className={`${stat.color} ${stat.shadow || 'shadow-[0_8px_30px_rgb(0,0,0,0.04)]'} rounded-[24px] p-8 border border-[#e5e7eb] flex flex-col gap-4 group hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-500 ${stat.onClick ? 'cursor-pointer active:scale-95' : 'cursor-default'}`}
                     >
-                        <div className={`w-14 h-14 ${stat.accentColor} rounded-2xl flex items-center justify-center transition-transform duration-500 group-hover:rotate-6`}>
+                        <div className={`w-14 h-14 ${stat.accentColor || 'bg-black/5'} rounded-2xl flex items-center justify-center transition-transform duration-500 group-hover:rotate-6`}>
                             <stat.icon className={`w-7 h-7 ${textColor}`} />
                         </div>
                         <div>
