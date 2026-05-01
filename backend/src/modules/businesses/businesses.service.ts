@@ -376,24 +376,42 @@ export class BusinessesService {
         }
 
         try {
-            // Get total count
-            const total = await queryBuilder.getCount();
-
-            // Get paginated results
-            const listings = await queryBuilder.skip(skip).take(limit).getRawAndEntities();
+            // Use getManyAndCount for better performance and reliability with skip/take
+            // This avoids complex subqueries that often fail in Postgres with many joins
+            const [entities, total] = await queryBuilder.skip(skip).take(limit).getManyAndCount();
 
             // Map and format results
-            const results = listings.entities.map((listing, index) => {
-                const result: any = listing;
-                // Add distance calculation if needed
-                return result;
+            const results = entities.map((listing) => {
+                // Add any additional formatting here if needed
+                return listing;
             });
 
             return createPaginatedResponse(results, page, limit, total);
         } catch (error: any) {
-            const fs = require('fs');
-            const path = require('path');
-            fs.appendFileSync(path.join(process.cwd(), 'permanent_error_log.txt'), `[Search ERROR] ${new Date().toISOString()}: ${error.message}\nStack: ${error.stack}\nDetails: ${JSON.stringify(error)}\n\n`);
+            // Enhanced robust logging
+            try {
+                const fs = require('fs');
+                const path = require('path');
+                const logPath = path.join(process.cwd(), 'permanent_error_log.txt');
+                
+                // Safely stringify error to avoid circular reference issues
+                const safeError = {
+                    message: error.message,
+                    stack: error.stack,
+                    code: error.code,
+                    detail: error.detail,
+                    query: error.query,
+                    parameters: error.parameters
+                };
+                
+                fs.appendFileSync(logPath, `[Search ERROR] ${new Date().toISOString()}: ${error.message}\n` +
+                    `Stack: ${error.stack}\n` +
+                    `Details: ${JSON.stringify(safeError, null, 2)}\n\n`);
+            } catch (loggingError) {
+                console.error('CRITICAL: Logging failed during Search error capture:', loggingError);
+            }
+            
+            // Re-throw to maintain original behavior (NestJS will return 500)
             throw error;
         }
     }
