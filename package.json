@@ -13,7 +13,8 @@
     "dev": "concurrently \"npm run dev:web\" \"npm run dev:backend\"",
     "build": "npm run build --workspace=@business-saas/api && npm run build --workspace=@apps/web",
     "lint": "npm run lint --workspaces --if-present",
-    "start": "npm run start:prod --prefix backend",
+    "start": "npm run start:prod --workspace=@business-saas/api",
+    "start:prod": "npm run start:prod --workspace=@business-saas/api",
     "debug:dist": "ls -R backend/dist"
   },
   "engines": {
