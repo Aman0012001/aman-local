@@ -73,10 +73,11 @@
         "typeorm": "^0.3.28",
         "unrs-resolver": "^1.11.1",
         "uuid": "^9.0.1",
-        "web-push": "^3.6.7"
+        "web-push": "^3.6.7",
+        "rimraf": "^5.0.5",
+        "@nestjs/cli": "^11.0.16"
     },
     "devDependencies": {
-        "@nestjs/cli": "^11.0.16",
         "@nestjs/schematics": "^11.0.9",
         "@nestjs/testing": "^11.1.14",
         "@types/bcrypt": "^5.0.2",
@@ -96,7 +97,6 @@
         "jest": "^29.7.0",
         "node-fetch": "^2.6.7",
         "prettier": "^3.1.1",
-        "rimraf": "^5.0.5",
         "source-map-support": "^0.5.21",
         "supertest": "^6.3.3",
         "ts-jest": "^29.1.1",
