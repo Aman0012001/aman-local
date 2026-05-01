@@ -42,6 +42,9 @@ export class SubscriptionPlan {
     @Column({ name: 'stripe_price_id', nullable: true })
     stripePriceId: string;
 
+    @Column({ name: 'max_listings', default: 1 })
+    maxListings: number;
+
     @Column({ name: 'is_featured', default: false })
     isFeatured: boolean;
 

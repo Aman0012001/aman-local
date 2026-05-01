@@ -50,6 +50,7 @@ export class SubscriptionsSeederService implements OnModuleInit {
                 },
                 isFeatured: false,
                 stripePriceId: null,
+                maxListings: 1,
                 isActive: true,
             },
         ];
