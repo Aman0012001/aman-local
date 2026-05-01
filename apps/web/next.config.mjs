@@ -5,9 +5,10 @@ const isProd = process.env.NODE_ENV === 'production';
 const nextConfig = {
     reactStrictMode: true,
 
-    // Static export mode only during production build (produces the "out" folder for Netlify).
-    // In dev mode we skip this so dynamic routes work without the generateStaticParams constraint.
-    ...(isProd && { output: "export" }),
+    // Netlify supports dynamic Next.js features (SSR, dynamic routing, etc.)
+    // We remove output: 'export' to let the Netlify Next.js plugin handle the build.
+    // output: "export", 
+
 
     images: {
         unoptimized: true,
