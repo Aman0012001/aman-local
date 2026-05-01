@@ -69,10 +69,11 @@ async function bootstrap() {
 
             // 2. Allow dynamic subdomains via Regex
             const allowedPatterns = [
-                /^https:\/\/.*\.netlify\.app$/,      // All Netlify dynamic domains
-                /^https:\/\/.*\.railway\.app$/,      // All Railway dynamic domains
-                /^http:\/\/localhost(:\d+)?$/,        // localhost with any port
-                /^http:\/\/127\.0.0\.1(:\d+)?$/,    // 127.0.0.1 with any port
+                /^https?:\/\/.*\.netlify\.app\/?$/,      // All Netlify dynamic domains
+                /^https?:\/\/.*\.railway\.app\/?$/,      // All Railway dynamic domains
+                /^https?:\/\/.*\.vercel\.app\/?$/,       // All Vercel dynamic domains
+                /^http:\/\/localhost(:\d+)?\/?$/,        // localhost with any port
+                /^http:\/\/127\.0.0\.1(:\d+)?\/?$/,    // 127.0.0.1 with any port
             ];
 
             const isMatchingPattern = allowedPatterns.some(pattern => pattern.test(origin));
@@ -81,8 +82,8 @@ async function bootstrap() {
                 return callback(null, true);
             }
 
-            console.warn(`❌ CORS Blocked: origin ${origin} not allowed`);
-            return callback(new Error('Not allowed by CORS'), false);
+            console.error(`❌ CORS Blocked: origin ${origin} not in allowed list or patterns`);
+            return callback(new Error(`CORS Error: Origin ${origin} not allowed`), false);
         },
         credentials: true,
         methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
