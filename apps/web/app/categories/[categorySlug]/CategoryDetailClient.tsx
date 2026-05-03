@@ -73,10 +73,10 @@ export default function CategoryDetailClient({ categorySlug }: { categorySlug: s
 
     useEffect(() => {
         const loadCategoryData = async () => {
-            let actualSlug = slug;
+            let actualSlug = categorySlug;
 
             // Handle SPA fallback where the page is served by a 'template' HTML file
-            if ((slug === 'template' || slug === 'general') && typeof window !== 'undefined') {
+            if ((categorySlug === 'template' || categorySlug === 'general') && typeof window !== 'undefined') {
                 const pathParts = window.location.pathname.split('/').filter(Boolean);
                 // URL structure: /categories/slug/ or /categories/slug
                 if (pathParts[0] === 'categories' && pathParts[1] && pathParts[1] !== 'template') {
@@ -145,7 +145,7 @@ export default function CategoryDetailClient({ categorySlug }: { categorySlug: s
             }
         };
         loadCategoryData();
-    }, [slug, filters, sortBy, latitude, longitude, radius]);
+    }, [categorySlug, filters, sortBy, latitude, longitude, radius]);
 
     // Initialize Google Places Autocomplete for Area input
     useEffect(() => {
@@ -269,7 +269,7 @@ export default function CategoryDetailClient({ categorySlug }: { categorySlug: s
                             <div className="flex items-center justify-between">
                                 <h3 className="text-sm font-black uppercase tracking-[0.2em] text-[#1e293b]">Filters</h3>
                                 <button
-                                    onClick={() => setFilters({ city: '', minRating: 0, priceRange: '', verifiedOnly: false, featuredOnly: false, openNow: false })}
+                                    onClick={() => setFilters({ city: '', state: '', area: '', minRating: 0, minReviews: 0, verifiedOnly: false, featuredOnly: false, openNow: false, amenities: [], page: 1 })}
                                     className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline"
                                 >
                                     Clear All
@@ -561,7 +561,7 @@ export default function CategoryDetailClient({ categorySlug }: { categorySlug: s
                                 <h3 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter">Zero Matches.</h3>
                                 <p className="text-slate-400 font-bold mb-10 max-w-sm">We couldn't find any listings in this category matching your filters. Try adjusting your parameters.</p>
                                 <button
-                                    onClick={() => setFilters({ city: '', minRating: 0, priceRange: '', verifiedOnly: false, featuredOnly: false, openNow: false })}
+                                    onClick={() => setFilters({ city: '', state: '', area: '', minRating: 0, minReviews: 0, verifiedOnly: false, featuredOnly: false, openNow: false, amenities: [], page: 1 })}
                                     className="px-10 py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-600/20 hover:scale-105 active:scale-95 transition-all"
                                 >
                                     Reset Filters
