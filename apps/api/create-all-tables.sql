@@ -202,6 +202,30 @@ CREATE INDEX IF NOT EXISTS idx_reviews_business_id ON reviews(business_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_rating ON reviews(rating);
 
 -- ============================================================================
+-- OFFERS
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS offers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    business_id UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    discount VARCHAR(100),
+    promo_code VARCHAR(50),
+    start_date TIMESTAMP,
+    end_date TIMESTAMP,
+    expiry_date TIMESTAMP,
+    is_active BOOLEAN DEFAULT true,
+    is_featured BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_offers_business_id ON offers(business_id);
+CREATE INDEX IF NOT EXISTS idx_offers_is_active ON offers(is_active);
+CREATE INDEX IF NOT EXISTS idx_offers_is_featured ON offers(is_featured);
+
+-- ============================================================================
 -- REVIEW HELPFUL VOTES
 -- ============================================================================
 
@@ -389,3 +413,14 @@ ON CONFLICT DO NOTHING;
 
 SELECT '✅ Database schema created successfully!' as status;
 SELECT 'Total tables created: ' || COUNT(*) as info FROM information_schema.tables WHERE table_schema = 'public';
+
+-- ============================================================================
+-- SEED DATA - Offers (Optional)
+-- ============================================================================
+-- Note: This requires existing businesses. We'll use a subquery to find a business.
+INSERT INTO offers (business_id, title, description, discount, is_featured)
+SELECT id, 'Grand Opening Discount', 'Get 20% off on all main courses!', '20% OFF', true
+FROM businesses 
+WHERE slug = 'delhi-restaurants-1'
+LIMIT 1
+ON CONFLICT DO NOTHING;

@@ -3,12 +3,19 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { BusinessesModule } from './modules/businesses/businesses.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CitiesModule } from './modules/cities/cities.module';
 import { DemandModule } from './modules/demand/demand.module';
+import { ReviewsModule } from './modules/reviews/reviews.module';
+import { OffersModule } from './modules/offers/offers.module';
 import { NotificationsGateway } from './gateways/notifications.gateway';
 
 @Module({
@@ -65,6 +72,8 @@ import { NotificationsGateway } from './gateways/notifications.gateway';
     AuthModule,
     CitiesModule,
     DemandModule,
+    ReviewsModule,
+    OffersModule,
   ],
   controllers: [AppController],
   providers: [AppService, NotificationsGateway],

@@ -1,6 +1,6 @@
 import { Business, Category, City, SearchResponse, Review, ReviewReply } from '../types/api';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://local-business-listing-directory-production.up.railway.app/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 const API_ROOT = API_BASE_URL.split('/api')[0];
 
 console.log('[api.ts] Unified API_BASE_URL:', API_BASE_URL);
@@ -83,7 +83,7 @@ async function fetcher<T>(endpoint: string, options?: FetcherOptions): Promise<T
 
         // Check if the response has content before parsing as JSON
         const text = await response.text();
-        return text ? JSON.parse(text) : (undefined as any);
+        return safeParse(text);
     } catch (error: any) {
         clearTimeout(timeoutId);
 
@@ -121,6 +121,15 @@ async function fetcher<T>(endpoint: string, options?: FetcherOptions): Promise<T
         throw error;
     }
 }
+
+const safeParse = (text: string) => {
+    try {
+        return text ? JSON.parse(text) : {};
+    } catch (e) {
+        console.error('[api.ts] Failed to parse JSON:', e);
+        return {};
+    }
+};
 
 export const api = {
     get: <T>(endpoint: string, options?: FetcherOptions) => fetcher<T>(endpoint, { ...options, method: 'GET' }),
@@ -362,6 +371,14 @@ export const api = {
         }),
         getByCity: (city: string) => fetcher<any>(`/vendors/by-city?city=${encodeURIComponent(city)}`),
         getPublicProfile: (id: string) => fetcher<any>(`/vendors/${id}/public`),
+    },
+    demand: {
+        logSearch: (data: { keyword: string, city?: string, latitude?: number, longitude?: number }) =>
+            fetcher('/demand/log', { method: 'POST', body: JSON.stringify(data), silent: true }),
+        getInsights: (city?: string) => fetcher<any[]>(`/demand/insights${city ? `?city=${city}` : ''}`, { silent: true }),
+        getAISummary: (city?: string) => fetcher<{ summary: string }>(`/demand/summary-ai${city ? `?city=${city}` : ''}`, { silent: true }),
+        getNearby: (lat?: number, lng?: number) => fetcher<any[]>(`/demand/nearby${lat !== undefined && lng !== undefined ? `?lat=${lat}&lng=${lng}` : ''}`, { silent: true }),
+        getHeatmap: (keyword?: string) => fetcher<any[]>(`/demand/heatmap${keyword ? `?keyword=${keyword}` : ''}`, { silent: true }),
     },
     leads: {
         getForVendor: (params: any = {}) => {
@@ -630,13 +647,6 @@ export const api = {
             fetcher<void>(`/vendor/comments/reply/${replyId}`, {
                 method: 'DELETE',
             }),
-    },
-    demand: {
-        getInsights: (city?: string) => fetcher<any[]>(`/demand/insights${city ? `?city=${city}` : ''}`, { silent: true }),
-        getAISummary: (city?: string) => fetcher<{ summary: string }>(`/demand/summary-ai${city ? `?city=${city}` : ''}`, { silent: true }),
-        getNearby: (lat?: number, lng?: number) => fetcher<any[]>(`/demand/nearby${lat !== undefined && lng !== undefined ? `?lat=${lat}&lng=${lng}` : ''}`, { silent: true }),
-        getHeatmap: (keyword?: string) => fetcher<any[]>(`/demand/heatmap${keyword ? `?keyword=${keyword}` : ''}`, { silent: true }),
-        logSearch: (data: any) => fetcher('/demand/log', { method: 'POST', body: JSON.stringify(data), silent: true }),
     },
     follows: {
         follow: (businessId: string) =>

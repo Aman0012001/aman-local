@@ -37,29 +37,7 @@ export class LeadsService {
         private notificationsService: NotificationsService,
     ) { }
     
-    async onModuleInit() {
-        // Ensure 'chat' exists in the LeadType enum in PostgreSQL (important for Railway/Prod)
-        try {
-            await this.leadRepository.query(`
-                DO $$
-                BEGIN
-                    IF NOT EXISTS (SELECT 1 FROM pg_type t 
-                                  JOIN pg_enum e ON t.oid = e.enumtypid 
-                                  WHERE t.typname = 'leads_type_enum' AND e.enumlabel = 'chat') THEN
-                        ALTER TYPE leads_type_enum ADD VALUE 'chat';
-                    END IF;
-                EXCEPTION
-                    WHEN others THEN
-                        -- Type might not exist yet if tables haven't been created, which is fine
-                        NULL;
-                END
-                $$;
-            `);
-            console.log('✅ LeadType enum (chat) checked in Railway database');
-        } catch (err: any) {
-            console.warn('[LeadsService] Database enum check skipped or failed: ' + err.message);
-        }
-    }
+    // onModuleInit removed to avoid potential deadlocks with TypeORM synchronization
 
     /**
      * Create a new lead (Customer interaction)

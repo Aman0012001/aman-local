@@ -18,7 +18,7 @@ export default function Skeleton({ className = "", variant = "rectangular" }: Sk
       case "rounded":
         return "rounded-2xl";
       case "premium-card":
-        return "rounded-[32px]";
+        return " rounded-[15px]";
       default:
         return "rounded-lg";
     }
@@ -44,7 +44,7 @@ export default function Skeleton({ className = "", variant = "rectangular" }: Sk
 
 export function CardSkeleton() {
   return (
-    <div className="bg-white rounded-[32px] border border-slate-50 p-6 space-y-6 shadow-sm">
+    <div className="bg-white  rounded-[15px] border border-slate-50 p-6 space-y-6 shadow-sm">
       <div className="flex items-center gap-4">
         <Skeleton variant="rounded" className="w-14 h-14" />
         <div className="flex-1 space-y-2">

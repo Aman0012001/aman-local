@@ -155,7 +155,7 @@ export default function VendorChatDashboard() {
     }
 
     return (
-        <div className="flex flex-col h-full overflow-hidden">
+        <div className="flex flex-col h-[calc(100vh-140px)] overflow-hidden">
             <div className="flex-1 flex w-full gap-6 overflow-hidden">
                 {/* Desktop Sidebar / Conversation List */}
                 <div className={`flex-col bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-300 ${selectedConvId ? 'hidden md:flex' : 'flex'} w-full md:w-80 lg:w-96`}>
@@ -179,7 +179,7 @@ export default function VendorChatDashboard() {
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                    <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
                         {filteredConversations.length === 0 ? (
                             <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-3">
                                 <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center">
@@ -309,7 +309,7 @@ export default function VendorChatDashboard() {
                             {/* Messages Container */}
                             <div
                                 ref={scrollRef}
-                                className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/50"
+                                className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/50 custom-scrollbar"
                             >
                                 {messagesLoading ? (
                                     <div className="h-full flex items-center justify-center">

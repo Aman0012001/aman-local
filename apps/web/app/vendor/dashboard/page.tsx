@@ -382,9 +382,9 @@ export default function GenericDashboard() {
             >
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                     <div>
-                        <h1 className="text-4xl lg:text-7xl font-black text-[#131b2e] mb-4 tracking-tighter leading-[1.05]">
+                        <h3 className="text-[2.5rem] font-black text-[#131b2e] mb-4 tracking-tighter leading-tight">
                             Welcome back, <span className="text-[#004a99]">{user?.fullName?.split(' ')[0] || 'Member'}!</span>
-                        </h1>
+                        </h3>
                         <p className="text-xl text-[#64748b] font-bold tracking-tight">
                             {isVendor ? "Here's the latest pulse of your business listings." : "Explore and manage your favorite local experiences."}
                         </p>
@@ -402,7 +402,7 @@ export default function GenericDashboard() {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="mb-12 overflow-hidden rounded-[32px] bg-[#131b2e] border border-[#2d3748] relative"
+                    className="mb-12 overflow-hidden  rounded-[15px] bg-[#131b2e] border border-[#2d3748] relative"
                 >
                     <div className="absolute top-0 right-0 w-64 h-64 bg-[#004a99]/20 rounded-full blur-[100px] pointer-events-none" />
                     <div className="p-8 sm:p-12 flex flex-col sm:flex-row items-center justify-between gap-8 relative z-10">
@@ -732,7 +732,7 @@ export default function GenericDashboard() {
 
                     {/* Referral Section */}
                     {isVendor && (
-                        <section className="bg-[#131b2e] rounded-[32px] p-10 border border-[#2d3748] shadow-[0_30px_60px_rgb(0,0,0,0.25)] relative overflow-hidden group">
+                        <section className="bg-[#131b2e]  rounded-[15px] p-10 border border-[#2d3748] shadow-[0_30px_60px_rgb(0,0,0,0.25)] relative overflow-hidden group">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-[#004a99]/10 rounded-full blur-[100px] pointer-events-none" />
 
                             <div className="relative z-10">

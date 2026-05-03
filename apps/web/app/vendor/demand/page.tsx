@@ -31,8 +31,10 @@ export default function VendorDemandPage() {
                     fetchDemand(coords.lat, coords.lng);
                 },
                 (err) => {
-                    console.error("Geolocation error:", err);
-                    // Default to some coordinates for demo if user blocks location
+                    // GeolocationPositionError doesn't stringify well, log the message
+                    console.warn("Geolocation access denied or unavailable. Using default location (NYC).", err.message || err);
+                    
+                    // Fallback to default coordinates for demo
                     const defaultCoords = { lat: 40.7128, lng: -74.0060 }; // NYC
                     setLocation(defaultCoords);
                     fetchDemand(defaultCoords.lat, defaultCoords.lng);

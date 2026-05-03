@@ -40,9 +40,11 @@ import Link from "next/link";
 import { Category, Business, City } from "../types/api";
 import Slider from "react-slick";
 import CitySearchSelect from "../components/CitySearchSelect";
+import { useRouter } from "next/navigation";
 // Script is removed to avoid multiple loads (already in layout.tsx)
 
 export default function HomePage() {
+  const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [featuredBusinesses, setFeaturedBusinesses] = useState<Business[]>([]);
   const [paginationMetadata, setPaginationMetadata] = useState({
@@ -64,8 +66,10 @@ export default function HomePage() {
     lat: number;
     lng: number;
   } | null>(null);
+  const featuredRef = useRef<HTMLElement>(null);
 
   const [loading, setLoading] = useState(true);
+  const [featuredLoading, setFeaturedLoading] = useState(false);
   const [statsComments, setStatsComments] = useState<any[]>([]);
   // heroImages slider removed in favor of clean design
   const badgeText = "Your Local. Your Choice.";
@@ -122,20 +126,17 @@ export default function HomePage() {
     arrows: false,
     pauseOnHover: false,
   };
+  // 1. Initial Load (Everything)
   useEffect(() => {
     const loadInitialData = async () => {
       try {
         setLoading(true);
-        console.log(
-          `Fetching homepage data for page ${paginationMetadata.page}...`,
-        );
         const results = await Promise.allSettled([
           api.categories.getPopular(8),
-          api.listings.getFeatured(paginationMetadata.page, 12),
+          api.listings.getFeatured(1, 12),
           api.cities.getPopular(),
           api.categories.getAll(),
           api.cities.getAll(),
-          // Only show 'homepage' boosted offers on the landing page
           api.offers.search({ limit: 20, placement: "homepage" }),
           api.reviews.getPopular(15),
         ]);
@@ -143,31 +144,58 @@ export default function HomePage() {
         const getValue = (result: PromiseSettledResult<any>, fallback: any) =>
           result.status === "fulfilled" ? result.value : fallback;
 
-        const cats = getValue(results[0], []);
+        setCategories(getValue(results[0], []));
         const featured = getValue(results[1], { data: [], meta: {} });
-        const cities = getValue(results[2], []);
-        const allCats = getValue(results[3], []);
-        const allCities = getValue(results[4], []);
-        const offersData = getValue(results[5], { data: [] });
-        const reviewsData = getValue(results[6], { data: [] });
-
-        setCategories(cats || []);
         setFeaturedBusinesses(featured?.data || []);
         if (featured?.meta) {
-          setPaginationMetadata((prev) => ({ ...prev, ...featured.meta }));
+          setPaginationMetadata(prev => ({ ...prev, ...featured.meta }));
         }
-        setPopularCities(cities || []);
-        setCategoriesList(allCats || []);
-        setCitiesList(allCities || []);
-        setStatsComments(reviewsData?.data || []);
-        setLatestOffers(offersData?.data || []);
+        setPopularCities(getValue(results[2], []));
+        setCategoriesList(getValue(results[3], []));
+        setCitiesList(getValue(results[4], []));
+        
+        const latestOffersData = getValue(results[5], { data: [] });
+        setLatestOffers(latestOffersData?.data || []);
+        
+        const statsCommentsData = getValue(results[6], { data: [] });
+        setStatsComments(statsCommentsData?.data || []);
       } catch (err) {
-        console.error("CRITICAL: Unexpected error in loadInitialData:", err);
+        console.error("Initial load failed:", err);
       } finally {
         setLoading(false);
       }
     };
     loadInitialData();
+  }, []);
+
+  // 2. Pagination Load (Only Featured Businesses)
+  useEffect(() => {
+    if (loading) return; // Skip if initial load is still happening
+
+    const loadFeaturedPage = async () => {
+      try {
+        setFeaturedLoading(true);
+        const featured = await api.listings.getFeatured(paginationMetadata.page, 12);
+        setFeaturedBusinesses(featured.data || []);
+        if (featured.meta) {
+          setPaginationMetadata(prev => ({ ...prev, ...featured.meta }));
+        }
+        // Scroll to section when page changes
+        if (featuredRef.current) {
+          const yOffset = -100; // Offset for navbar
+          const y = featuredRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      } catch (err) {
+        console.error("Failed to load featured page:", err);
+      } finally {
+        setFeaturedLoading(false);
+      }
+    };
+
+    if (paginationMetadata.page > 1 || featuredBusinesses.length > 0) {
+        loadFeaturedPage();
+    }
   }, [paginationMetadata.page]);
 
   const searchRef = useRef<HTMLDivElement>(null);
@@ -190,7 +218,7 @@ export default function HomePage() {
       params.append("latitude", String(userLocation.lat));
       params.append("longitude", String(userLocation.lng));
     }
-    window.location.href = `/search?${params.toString()}`;
+    router.push(`/search?${params.toString()}`);
   };
 
   // Debounced search logging for "Live Search" heatmap
@@ -402,7 +430,7 @@ export default function HomePage() {
                             onClick={() => {
                               setSearchQuery(cat.name);
                               setIsSuggestionsOpen(false);
-                              window.location.href = `/search?category=${cat.slug}`;
+                              router.push(`/search?category=${cat.slug}`);
                             }}
                             className="w-full flex items-center justify-between p-3 hover:bg-slate-50 rounded-xl text-slate-700 font-bold transition-all group"
                           >
@@ -537,7 +565,7 @@ export default function HomePage() {
       </section>
 
       {/* Featured Businesses */}
-      <section className="py-24 bg-slate-50/50">
+      <section ref={featuredRef} className="py-24 bg-slate-50/50">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-center gap-6 mb-16 text-center">
             <div className="h-[1px] bg-slate-200 w-24 md:w-48" />
@@ -548,7 +576,12 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredBusinesses.length > 0 ? (
+            {featuredLoading ? (
+              <div className="col-span-full py-40 flex flex-col items-center justify-center bg-white rounded-3xl border border-slate-100">
+                <Loader2 className="w-10 h-10 text-orange-500 animate-spin mb-4" />
+                <p className="text-slate-400 font-bold">Refreshing listings...</p>
+              </div>
+            ) : featuredBusinesses.length > 0 ? (
               featuredBusinesses.map((biz, idx) => (
                 <motion.div
                   key={biz.id}
@@ -712,7 +745,7 @@ export default function HomePage() {
                   <OfferCard
                     offer={offer}
                     onEnquire={() => {
-                      window.location.href = `/offers-events/${offer.id}`;
+                      router.push(`/offers-events/${offer.id}`);
                     }}
                   />
                 </motion.div>
@@ -866,15 +899,16 @@ export default function HomePage() {
                 name: rev.user?.fullName || "Aman U.",
                 location: rev.user?.city || "Local",
                 role: "Verified Local",
-                text: rev.content,
+                text: rev.comment,
                 rating: rev.rating || 5,
-                img: rev.user?.avatarUrl || null,
+                img: rev.user?.avatarUrl ? getImageUrl(rev.user.avatarUrl) : null,
                 date: rev.createdAt,
                 business: rev.business?.title || "Local Shop",
               }))
               : fallbackReviews;
 
 
+          // Triple the cards for smooth infinite scroll
           const row1 = [...cards, ...cards, ...cards];
           const row2 = [...cards, ...cards, ...cards];
 
@@ -921,62 +955,22 @@ export default function HomePage() {
           );
 
           return (
-            <div className="max-w-7xl mx-auto px-4 overflow-hidden">
-              <div className="space-y-4">
-                <div className="relative">
-                  <div
-                    className="flex"
-                    style={{
-                      animation: "marquee-rtl 35s linear infinite",
-                      width: "max-content",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.animationPlayState = "paused")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.animationPlayState = "running")
-                    }
-                  >
-                    {row1.map((card, idx) => (
-                      <ReviewCard key={idx} card={card} idx={idx} />
-                    ))}
-                  </div>
+            <div className="max-w-7xl mx-auto px-4">
+              <div className="relative overflow-hidden py-4">
+                <div className="flex w-max animate-scroll hover:[animation-play-state:paused]">
+                  {row1.map((card, idx) => (
+                    <ReviewCard key={`row1-${idx}`} card={card} idx={idx} />
+                  ))}
                 </div>
-
-                <div className="relative">
-                  <div
-                    className="flex"
-                    style={{
-                      animation: "marquee-ltr 35s linear infinite",
-                      width: "max-content",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.animationPlayState = "paused")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.animationPlayState = "running")
-                    }
-                  >
-                    {row2.map((card, idx) => (
-                      <ReviewCard key={idx} card={card} idx={idx} />
-                    ))}
-                  </div>
+                <div className="flex w-max animate-scroll-reverse hover:[animation-play-state:paused] mt-6">
+                  {row2.map((card, idx) => (
+                    <ReviewCard key={`row2-${idx}`} card={card} idx={idx} />
+                  ))}
                 </div>
               </div>
             </div>
           );
         })()}
-
-        <style>{`
-                    @keyframes marquee-rtl {
-                        0%   { transform: translateX(0); }
-                        100% { transform: translateX(-33.333%); }
-                    }
-                    @keyframes marquee-ltr {
-                        0%   { transform: translateX(-33.333%); }
-                        100% { transform: translateX(0); }
-                    }
-                `}</style>
       </section>
 
       {/* Business Recruitment CTA */}

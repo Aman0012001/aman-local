@@ -1,15 +1,17 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import {
     BadgeCheck, Star, Mail, Phone, MapPin,
     Calendar, Building2, Globe, ArrowLeft,
     TrendingUp, Award, Clock, Search, Filter,
-    Tag, Gift, Ticket, ChevronRight
+    Tag, Gift, Ticket, ChevronRight, Check,
+    MessageSquare, Share2, ShieldCheck, Heart, MessageCircle, Send
 } from 'lucide-react';
 import { api, getImageUrl } from '../../../lib/api';
 import Navbar from '../../../components/Navbar';
+import Footer from '../../../components/Footer';
 import VendorAvatar from '../../../components/VendorAvatar';
 import ChatTrigger from '../../../components/chat/ChatTrigger';
 
@@ -32,64 +34,74 @@ interface VendorProfile {
     listings: any[];
     offers?: any[];
     events?: any[];
+    businessHours?: any[];
+    latitude?: number;
+    longitude?: number;
 }
 
 export default function VendorProfileClient({ vendorId }: { vendorId: string }) {
     const [vendor, setVendor] = useState<VendorProfile | null>(null);
+    const [reviews, setReviews] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchProfile = async () => {
+        const fetchProfileData = async () => {
             try {
-                const data = await api.vendors.getPublicProfile(vendorId);
-                setVendor(data);
+                const [profileData, reviewsData] = await Promise.all([
+                    api.vendors.getPublicProfile(vendorId),
+                    api.reviews.getByVendor(vendorId)
+                ]);
+                setVendor(profileData);
+                setReviews(reviewsData.data || []);
             } catch (err: any) {
-                console.error('[VendorProfile] Failed to load profile:', err);
+                console.error('[VendorProfile] Failed to load data:', err);
                 setError(err.message || 'Failed to load vendor profile');
             } finally {
                 setLoading(false);
             }
         };
-        fetchProfile();
+        fetchProfileData();
     }, [vendorId]);
 
-    const filteredListings = React.useMemo(() => {
-        if (!vendor) return [];
-        return vendor.listings.filter(item => {
-            const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesCategory = !activeCategory || item.categoryName === activeCategory;
-            return matchesSearch && matchesCategory;
-        });
-    }, [vendor, searchTerm, activeCategory]);
+    const currentDay = new Date().toLocaleDateString('en-US', { weekday: 'long' });
 
-    const activeOffers = React.useMemo(() => {
-        if (!vendor?.offers) return [];
-        const now = new Date();
-        return vendor.offers.filter(offer => {
-            const expiry = offer.expiryDate ? new Date(offer.expiryDate) : null;
-            return !expiry || expiry > now;
+    const sortedHours = useMemo(() => {
+        const daysOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        if (!vendor?.businessHours || vendor.businessHours.length === 0) return [];
+        
+        return [...vendor.businessHours].sort((a, b) => {
+            return daysOrder.indexOf(a.dayOfWeek.toLowerCase()) - daysOrder.indexOf(b.dayOfWeek.toLowerCase());
         });
-    }, [vendor?.offers]);
+    }, [vendor?.businessHours]);
 
-    const activeEvents = React.useMemo(() => {
-        if (!vendor?.events) return [];
+    const businessStatus = useMemo(() => {
+        if (!vendor?.businessHours || vendor.businessHours.length === 0) return null;
+        
         const now = new Date();
-        return vendor.events.filter(event => {
-            const end = event.endDate ? new Date(event.endDate) : null;
-            return !end || end > now;
-        });
-    }, [vendor?.events]);
+        const day = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+        const today = vendor.businessHours.find(h => h.dayOfWeek.toLowerCase() === day);
+        
+        if (!today || !today.isOpen) return { isOpen: false, label: 'Closed Now' };
+        
+        const [h1, m1] = (today.openTime || '09:00').split(':').map(Number);
+        const [h2, m2] = (today.closeTime || '18:00').split(':').map(Number);
+        
+        const start = h1 * 60 + m1;
+        const end = h2 * 60 + m2;
+        const current = now.getHours() * 60 + now.getMinutes();
+        
+        const isOpen = current >= start && current <= end;
+        return { isOpen, label: isOpen ? 'Open Now' : 'Closed Now' };
+    }, [vendor?.businessHours]);
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-slate-50">
+            <div className="min-h-screen bg-white">
                 <Navbar />
                 <div className="flex flex-col items-center justify-center h-[60vh]">
-                    <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4" />
-                    <p className="text-slate-400 font-bold animate-pulse">Loading Profile...</p>
+                    <div className="w-12 h-12 border-4 border-[#00346f] border-t-transparent rounded-full animate-spin mb-4" />
+                    <p className="text-slate-400 font-bold animate-pulse text-sm uppercase tracking-widest">Loading Expert Profile...</p>
                 </div>
             </div>
         );
@@ -97,7 +109,7 @@ export default function VendorProfileClient({ vendorId }: { vendorId: string }) 
 
     if (error || !vendor) {
         return (
-            <div className="min-h-screen bg-slate-50">
+            <div className="min-h-screen bg-white">
                 <Navbar />
                 <div className="max-w-xl mx-auto mt-20 p-8 bg-white rounded-3xl border border-slate-100 text-center shadow-sm">
                     <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -113,321 +125,364 @@ export default function VendorProfileClient({ vendorId }: { vendorId: string }) 
         );
     }
 
-    const avatar = vendor.avatarUrl ? getImageUrl(vendor.avatarUrl) : null;
-    const memberSince = vendor.createdAt ? new Date(vendor.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Recently';
+    const memberSince = vendor.createdAt ? new Date(vendor.createdAt).getFullYear() : new Date().getFullYear();
+
 
     return (
-        <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-indigo-50 selection:text-indigo-600">
+        <div className="min-h-screen bg-white font-sans text-slate-900">
             <Navbar />
 
-            {/* ── Minimalist Header Area ── */}
-            <div className="pt-16 pb-12 border-b border-slate-50 bg-[#F8FAFC]/50">
-                <main className="max-w-5xl mx-auto px-6">
-                    <div className="flex flex-col md:flex-row items-center md:items-start gap-10">
-                        {/* Avatar Section */}
-                        <div className="relative group">
-                            <VendorAvatar 
-                                src={vendor.avatarUrl} 
-                                alt={vendor.vendorName} 
-                                size="lg" 
-                                className="shadow-sm border border-slate-100 rounded-3xl"
-                            />
+            {/* Main Container */}
+            <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+
+                {/* Header Profile Section */}
+                <header className="bg-white rounded-[10px] border border-[#c4c6d0] p-6 lg:p-8 mb-8 shadow-sm">
+                    <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8">
+                        {/* Avatar */}
+                        <div className="relative">
+                            <div className="w-32 h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden border-4 border-[#d7e2ff] shadow-md">
+                                <img
+                                    src={vendor.avatarUrl ? getImageUrl(vendor.avatarUrl) as string : '/default-avatar.png'}
+                                    alt={vendor.businessName}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
                             {vendor.isVerified && (
-                                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-xl shadow-lg flex items-center justify-center border border-slate-50">
-                                    <BadgeCheck className="w-5 h-5 text-indigo-500" />
+                                <div className="absolute bottom-2 right-2 bg-[#00346f] text-white p-2 rounded-full shadow-lg border-2 border-white">
+                                    <BadgeCheck className="w-5 h-5" />
                                 </div>
                             )}
                         </div>
 
-                        {/* Summary Section */}
-                        <div className="flex-1 text-center md:text-left">
-                            <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
-                                <h1 className="text-4xl font-black tracking-tight text-slate-900">
-                                    {vendor.businessName}
-                                </h1>
-                                <span className="inline-flex items-center px-3 py-1 bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-widest rounded-full border border-indigo-100 mx-auto md:mx-0">
-                                    Member since {memberSince}
-                                </span>
-                            </div>
-
-                            <p className="text-slate-500 font-medium text-lg leading-relaxed max-w-2xl mb-8">
-                                {vendor.bio || `${vendor.businessName} is a verified professional service provider committed to excellence and customer satisfaction.`}
-                            </p>
-
-                            {/* Minimalist Stats Panel */}
-                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-8 border-t border-slate-100 pt-8 mt-auto">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100">
-                                        <Building2 className="w-5 h-5 text-slate-400" />
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-lg font-black text-slate-900 leading-none">{vendor.listingCount}</span>
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Services</span>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100">
-                                        <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-lg font-black text-slate-900 leading-none">{vendor.avgRating}</span>
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Avg Rating</span>
-                                    </div>
-                                </div>
-
-                                <div className="h-10 w-[1px] bg-slate-100 mx-2 hidden sm:block" />
-
-                                <div className="flex items-center gap-4">
-                                    {vendor.listings?.[0] && (
-                                        <ChatTrigger
-                                            businessId={vendor.listings[0].id}
-                                            businessName={vendor.businessName}
-                                            variant="icon"
-                                        />
-                                    )}
-                                    {vendor.businessPhone && (
-                                        <a href={`tel:${vendor.businessPhone}`} className="w-10 h-10 rounded-xl bg-white flex items-center justify-center border border-slate-100 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 transition-all shadow-sm group">
-                                            <Phone className="w-4 h-4 transition-transform group-hover:scale-110" />
-                                        </a>
-                                    )}
-                                    {vendor.businessEmail && (
-                                        <a href={`mailto:${vendor.businessEmail}`} className="w-10 h-10 rounded-xl bg-white flex items-center justify-center border border-slate-100 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 transition-all shadow-sm group">
-                                            <Mail className="w-4 h-4 transition-transform group-hover:scale-110" />
-                                        </a>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </main>
-            </div>
-
-            {/* ── Main Content Area ── */}
-            <main className="max-w-5xl mx-auto px-6 py-20 pb-32">
-                {/* ── Offers & Events Grid (Only if they exist) ── */}
-                {activeOffers.length > 0 || activeEvents.length > 0 ? (
-                    <div className="grid md:grid-cols-2 gap-12 mb-20">
-                        {/* Offers Section */}
-                        {activeOffers.length > 0 && (
-                            <div>
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="p-2 bg-orange-50 rounded-xl">
-                                        <Gift className="w-5 h-5 text-orange-500" />
-                                    </div>
-                                    <h2 className="text-xl font-black text-slate-900 tracking-tight text-center md:text-left">Exclusive Offers</h2>
-                                </div>
-                                <div className="space-y-4">
-                                    {activeOffers.map(offer => (
-                                        <div key={offer.id} className="group relative bg-white border border-slate-100 rounded-[20px] p-5 hover:border-orange-200 transition-all shadow-sm hover:shadow-md">
-                                            <div className="flex gap-5">
-                                                {offer.imageUrl && (
-                                                    <div className="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 bg-slate-50 border border-slate-50">
-                                                        <img src={getImageUrl(offer.imageUrl) as string} alt={offer.title} className="w-full h-full object-cover" />
-                                                    </div>
-                                                )}
-                                                <div className="flex-1">
-                                                    <div className="flex items-center justify-between mb-1">
-                                                        <h4 className="font-black text-slate-900 text-base">{offer.title}</h4>
-                                                        {offer.offerBadge && (
-                                                            <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 bg-orange-500 text-white rounded-full">
-                                                                {offer.offerBadge}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-3">
-                                                        {offer.description}
-                                                    </p>
-                                                    {offer.expiryDate && (
-                                                        <div className="flex items-center gap-1.5 text-slate-400">
-                                                            <Clock className="w-3 h-3" />
-                                                            <span className="text-[10px] font-bold uppercase tracking-widest">
-                                                                Expires: {new Date(offer.expiryDate).toLocaleDateString()}
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Events Section */}
-                        {activeEvents.length > 0 && (
-                            <div>
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="p-2 bg-indigo-50 rounded-xl">
-                                        <Ticket className="w-5 h-5 text-indigo-500" />
-                                    </div>
-                                    <h2 className="text-xl font-black text-slate-900 tracking-tight">Upcoming Events</h2>
-                                </div>
-                                <div className="space-y-4">
-                                    {activeEvents.map(event => (
-                                        <div key={event.id} className="group flex bg-white border border-slate-100 rounded-[20px] overflow-hidden hover:border-indigo-200 transition-all shadow-sm hover:shadow-md">
-                                            <div className="w-24 bg-indigo-600 p-4 flex flex-col items-center justify-center text-white text-center">
-                                                <span className="text-xs font-black uppercase tracking-widest opacity-80">
-                                                    {event.startDate ? new Date(event.startDate).toLocaleString('default', { month: 'short' }) : '---'}
-                                                </span>
-                                                <span className="text-2xl font-black leading-none my-1">
-                                                    {event.startDate ? new Date(event.startDate).getDate() : '--'}
-                                                </span>
-                                            </div>
-                                            <div className="p-5 flex-1">
-                                                <h4 className="font-black text-slate-900 text-base mb-1">{event.title}</h4>
-                                                <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-2">
-                                                    {event.description}
-                                                </p>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex items-center gap-1.5 text-indigo-600 font-black text-[10px] uppercase tracking-widest">
-                                                        <Clock className="w-3.5 h-3.5" />
-                                                        <span>{event.startDate ? new Date(event.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Time TBD'}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                ) : null}
-
-                {/* ── Search & Filter Panel ── */}
-                <div className="mb-12">
-                    <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-4">
-                        <div>
-                            <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-2">Professional Showcase</h2>
-                            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest leading-none">Discover our verified industry services</p>
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row items-center gap-4">
-                            {/* Search */}
-                            <div className="relative w-full sm:w-64">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
-                                <input
-                                    type="text"
-                                    placeholder="Search listings..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full pl-11 pr-4 py-3.5 bg-slate-50/50 border border-slate-100 rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-                                />
-                            </div>
-
-                            {/* Count Badge */}
-                            <div className="px-5 py-3.5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
-                                {filteredListings.length} Results
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Category Filter Pills */}
-                    <div className="flex flex-wrap items-center gap-2 mt-2">
-                        <button
-                            onClick={() => setActiveCategory(null)}
-                            className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${!activeCategory
-                                ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200'
-                                : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
-                                }`}
-                        >
-                            All Categories
-                        </button>
-                        {vendor.categories.map(cat => (
-                            <button
-                                key={cat}
-                                onClick={() => setActiveCategory(cat)}
-                                className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${activeCategory === cat
-                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-200'
-                                    : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
-                                    }`}
-                            >
-                                {cat}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="grid sm:grid-cols-2 gap-8">
-                    {filteredListings.map((item) => (
-                        <Link
-                            key={item.id}
-                            href={`/business/${item.slug}`}
-                            className="group flex flex-col gap-6 bg-white rounded-3xl border border-slate-100 p-3 hover:border-slate-200 transition-all duration-500 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.06)]"
-                        >
-                            <div className="relative h-64 rounded-2xl overflow-hidden bg-slate-50">
-                                {item.images?.[0] ? (
-                                    <img src={getImageUrl(item.images[0]) as string} alt={item.title} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                        <Building2 className="w-12 h-12 text-slate-200" />
+                        {/* Info */}
+                        <div className="flex-1 text-center lg:text-left">
+                            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-3">
+                                <h1 className="text-3xl lg:text-4xl font-black text-[#00346f] tracking-tight">{vendor.businessName}</h1>
+                                {vendor.isVerified && (
+                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-[#00346f]/5 text-[#00346f] rounded-full border border-[#00346f]/20">
+                                        <ShieldCheck className="w-4 h-4" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Verified Expert</span>
                                     </div>
                                 )}
-                                <div className="absolute top-4 left-4">
-                                    <div className="inline-flex items-center gap-2 px-3.5 py-2 bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-white/50">
-                                        <Tag className="w-3.5 h-3.5 text-indigo-500" />
-                                        <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">
-                                            {item.categoryName || 'General'}
-                                        </span>
-                                    </div>
+                            </div>
+
+                            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-[#44474e] font-medium mb-6">
+                                <div className="flex items-center gap-2 bg-orange-50 text-orange-700 px-3 py-1 rounded-full border border-orange-100">
+                                    <Star className="w-4 h-4 fill-orange-500 text-orange-500" />
+                                    <span className="font-bold">{vendor.avgRating} ({reviews.length} Reviews)</span>
                                 </div>
-                                <div className="absolute top-4 right-4">
-                                    <div className="flex items-center gap-1.5 px-3 py-2 bg-slate-900/10 backdrop-blur-md rounded-xl text-slate-900 text-[11px] font-black border border-white/40">
-                                        <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                                        <span>{Number(item.averageRating).toFixed(1)}</span>
-                                    </div>
+                                <div className="flex items-center gap-2">
+                                    <MapPin className="w-4 h-4 text-[#00346f]" />
+                                    <span>{vendor.businessAddress || 'Location available on request'}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Calendar className="w-4 h-4 text-[#00346f]" />
+                                    <span>Serving since {memberSince}</span>
                                 </div>
                             </div>
 
-                            <div className="px-5 pb-5 flex flex-col flex-1">
-                                <div className="flex items-start justify-between gap-4 mb-4">
-                                    <h3 className="text-xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors leading-tight line-clamp-1">
-                                        {item.title}
-                                    </h3>
-                                    <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center transition-all group-hover:bg-indigo-600 flex-shrink-0 group-hover:-translate-y-1">
-                                        <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-white" />
-                                    </div>
-                                </div>
-
-                                <div className="mt-auto flex items-center justify-between pt-6 border-t border-slate-50">
-                                    <div className="flex items-center gap-2 text-slate-400">
-                                        <MapPin className="w-4 h-4 text-indigo-400" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">{item.city}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex items-center gap-2 text-emerald-500">
-                                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                            <span className="text-[10px] font-black uppercase tracking-widest">Online</span>
-                                        </div>
-                                        <ChatTrigger
-                                            businessId={item.id}
-                                            businessName={item.title}
-                                            variant="icon"
-                                            className="!p-2 !rounded-xl !border-slate-100"
-                                        />
-                                    </div>
-                                </div>
+                            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
+                                <a 
+                                    href={`tel:${vendor.businessPhone}`}
+                                    className="px-8 py-3 bg-[#00346f] text-white font-black rounded-[10px] hover:bg-[#00346f]/90 transition-all shadow-md active:scale-95 flex items-center gap-2"
+                                >
+                                    <Phone className="w-4 h-4" /> Call Now
+                                </a>
+                                <button 
+                                    onClick={() => {
+                                        const phone = vendor.businessPhone?.replace(/\D/g, '');
+                                        if (phone) window.open(`https://wa.me/${phone}`, '_blank');
+                                    }}
+                                    className="px-8 py-3 bg-white text-[#00346f] font-black rounded-[10px] border-2 border-[#00346f] hover:bg-[#00346f]/5 transition-all flex items-center gap-2"
+                                >
+                                    <MessageSquare className="w-4 h-4" /> Message
+                                </button>
+                                <button 
+                                    onClick={() => {
+                                        if (navigator.share) {
+                                            navigator.share({
+                                                title: vendor.businessName,
+                                                text: vendor.bio,
+                                                url: window.location.href
+                                            });
+                                        } else {
+                                            navigator.clipboard.writeText(window.location.href);
+                                            alert('Link copied to clipboard!');
+                                        }
+                                    }}
+                                    className="p-3 bg-[#e2e2e6] text-[#1a1c1e] rounded-[10px] hover:bg-[#e2e2e6]/80 transition-all"
+                                >
+                                    <Share2 className="w-5 h-5" />
+                                </button>
+                                <button 
+                                    onClick={async () => {
+                                        if (!vendor.listings?.[0]) return;
+                                        try {
+                                            await api.users.addFavorite(vendor.listings[0].id);
+                                            alert('Added to favorites!');
+                                        } catch (err) {
+                                            console.error('Failed to favorite:', err);
+                                        }
+                                    }}
+                                    className="p-3 bg-[#e2e2e6] text-[#1a1c1e] rounded-[10px] hover:bg-[#e2e2e6]/80 transition-all group active:scale-95"
+                                >
+                                    <Heart className="w-5 h-5 group-hover:fill-red-500 group-hover:text-red-500 transition-colors" />
+                                </button>
                             </div>
-                        </Link>
-                    ))}
-                </div>
-
-                {filteredListings.length === 0 && (
-                    <div className="text-center py-24 bg-[#F8FAFC] rounded-[1rem] border border-dashed border-slate-200">
-                        <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm">
-                            <Search className="w-10 h-10 text-slate-200" />
                         </div>
-                        <h4 className="text-lg font-black text-slate-900 mb-1">No services matched your filter</h4>
-                        <p className="text-slate-400 text-sm font-medium">Try adjusting your search terms or category filter</p>
                     </div>
-                )}
-            </main>
+                </header>
 
-            <footer className="max-w-5xl mx-auto px-6 py-20 border-t border-slate-50 text-center">
-                <p className="text-[10px] font-bold text-slate-300 uppercase tracking-[0.2em]">
-                    &copy; {new Date().getFullYear()} {vendor.businessName} &bull; All Rights Reserved
-                </p>
-            </footer>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    {/* Left Column - Main Content */}
+                    <div className="lg:col-span-8 space-y-8">
+
+                        {/* About Us */}
+                        <section className="bg-white rounded-[10px] border border-[#c4c6d0] p-6 lg:p-8 shadow-sm">
+                            <h2 className="text-2xl font-black text-[#00346f] mb-6 flex items-center gap-3">
+                                <Building2 className="w-6 h-6" /> About Us
+                            </h2>
+                            <p className="text-[#44474e] leading-relaxed text-lg whitespace-pre-wrap">
+                                {vendor.bio || `${vendor.businessName} is a top-rated professional serving the community with dedication and expertise. We specialize in providing high-quality solutions tailored to your specific needs.`}
+                            </p>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-[#c4c6d0]">
+                                {[
+                                    { label: 'Total Views', value: vendor.totalViews, icon: TrendingUp },
+                                    { label: 'Active Listings', value: vendor.listingCount, icon: Tag },
+                                    { label: 'Awards Won', value: '12+', icon: Award },
+                                    { label: 'Success Rate', value: '99%', icon: ShieldCheck },
+                                ].map((stat, i) => (
+                                    <div key={i} className="text-center">
+                                        <div className="w-10 h-10 bg-[#00346f]/5 rounded-full flex items-center justify-center mx-auto mb-2">
+                                            <stat.icon className="w-5 h-5 text-[#00346f]" />
+                                        </div>
+                                        <div className="text-xl font-black text-[#00346f] leading-tight">{stat.value}</div>
+                                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+
+                        {/* Core Services */}
+                        <section className="bg-white rounded-[10px] border border-[#c4c6d0] p-6 lg:p-8 shadow-sm">
+                            <h2 className="text-2xl font-black text-[#00346f] mb-6 flex items-center gap-3">
+                                <Globe className="w-6 h-6" /> Our Core categories
+                            </h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {vendor.categories.map((cat, i) => (
+                                    <div key={i} className="flex items-center gap-4 p-4 bg-[#f3f3f7] rounded-[10px] border border-[#c4c6d0]/30 hover:border-[#00346f]/30 transition-all group">
+                                        <div className="w-12 h-12 bg-white rounded-[10px] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                                            <Tag className="w-6 h-6 text-[#00346f]" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-black text-[#00346f] text-lg leading-tight">{cat}</h4>
+                                            <p className="text-xs text-[#44474e] font-medium">Expert professional service</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+
+                        {/* Active Listings */}
+                        <section id="listings" className="space-y-6">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-2xl font-black text-[#00346f] flex items-center gap-3">
+                                    <Tag className="w-6 h-6" /> Active Services
+                                </h2>
+                                <span className="px-4 py-1 bg-[#00346f] text-white text-[10px] font-black uppercase tracking-widest rounded-full">
+                                    {vendor.listings.length} Results
+                                </span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {vendor.listings.map((item) => (
+                                    <div 
+                                        key={item.id} 
+                                        className="bg-white rounded-3xl border border-slate-200 overflow-hidden hover:shadow-xl transition-all group p-4"
+                                    >
+                                        <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-6">
+                                            <img 
+                                                src={item.images?.[0] ? getImageUrl(item.images[0]) as string : '/placeholder.jpg'} 
+                                                alt={item.title}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            />
+                                        </div>
+                                        <div className="px-2 pb-2">
+                                            <h3 className="text-2xl font-black text-[#00346f] mb-4">{item.title}</h3>
+                                            
+                                            <div className="flex flex-wrap gap-3 mb-6">
+                                                <div className="flex items-center gap-1.5 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100 text-sm font-bold">
+                                                    <BadgeCheck className="w-4 h-4" />
+                                                    <span>Approved</span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 px-4 py-2 bg-red-50 text-red-500 rounded-full border border-red-100 text-sm font-bold">
+                                                    <div className="w-2 h-2 rounded-full bg-red-500" />
+                                                    <span>Offline</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-3 mb-8">
+                                                <span className="text-xl font-black text-slate-700">{Number(item.averageRating || 5.0).toFixed(1)}</span>
+                                                <div className="flex items-center gap-0.5">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <Link 
+                                                href={`/business/${item.slug}`}
+                                                className="block w-full py-3 px-6 text-center border border-slate-200 text-[#00346f] font-bold rounded-xl hover:bg-[#00346f] hover:text-white transition-all text-lg"
+                                            >
+                                                View Details
+                                            </Link>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+
+                        {/* Offers & Events */}
+                        {(vendor.offers?.length || 0) > 0 && (
+                            <section className="bg-[#00346f] rounded-[10px] p-6 lg:p-8 text-white">
+                                <div className="flex items-center gap-3 mb-8">
+                                    <Gift className="w-8 h-8" />
+                                    <div>
+                                        <h2 className="text-2xl font-black tracking-tight">Exclusive Offers</h2>
+                                        <p className="text-sm opacity-80 font-medium">Limited time deals from {vendor.businessName}</p>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {vendor.offers?.map((offer: any) => (
+                                        <div key={offer.id} className="bg-white/10 backdrop-blur-md rounded-[10px] p-6 border border-white/20 hover:bg-white/15 transition-all">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="px-3 py-1 bg-white text-[#00346f] text-[10px] font-black uppercase tracking-widest rounded-full">
+                                                    {offer.offerBadge || 'DISCOUNT'}
+                                                </div>
+                                                {offer.expiryDate && (
+                                                    <div className="text-[10px] font-bold opacity-60 flex items-center gap-1.5">
+                                                        <Clock className="w-3 h-3" /> EXPIRES: {new Date(offer.expiryDate).toLocaleDateString()}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <h3 className="text-xl font-black mb-2">{offer.title}</h3>
+                                            <p className="text-sm opacity-80 mb-6 line-clamp-2">{offer.description}</p>
+                                            <button className="w-full py-3 bg-white text-[#00346f] font-black rounded-[10px] hover:bg-white/90 transition-all text-sm uppercase tracking-widest">
+                                                Claim Offer
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+
+                    </div>
+
+                    {/* Right Column - Sticky Sidebar */}
+                    <aside className="lg:col-span-4 space-y-8">
+                        <div className="sticky top-24 space-y-8">
+
+                             {/* Booking Card */}
+                             <div className="bg-[#0b1224] rounded-[10px] p-6 lg:p-8 text-white shadow-2xl">
+                                 <h3 className="text-xl font-black mb-8">Connect with Business</h3>
+ 
+                                 <div className="space-y-4">
+                                     {/* Call Now Button */}
+                                     <a 
+                                         href={`tel:${vendor.businessPhone}`}
+                                         className="w-full py-4 bg-white text-slate-900 font-black rounded-[10px] hover:bg-slate-100 transition-all flex items-center justify-center gap-3 text-base shadow-sm"
+                                     >
+                                         <Phone className="w-5 h-5" /> Call Now
+                                     </a>
+ 
+                                     {/* WhatsApp Express Button */}
+                                     <a 
+                                         href={`https://wa.me/${vendor.businessPhone?.replace(/\D/g, '')}`}
+                                         target="_blank"
+                                         rel="noopener noreferrer"
+                                         className="w-full py-4 bg-[#25d366] text-white font-black rounded-[10px] hover:bg-[#22c35e] transition-all flex items-center justify-center gap-3 text-base shadow-lg shadow-emerald-500/20"
+                                     >
+                                         <MessageSquare className="w-5 h-5" /> WhatsApp Express
+                                     </a>
+ 
+                                     {/* Secondary Chat Button */}
+                                     {vendor.listings?.[0] && (
+                                         <ChatTrigger
+                                             businessId={vendor.listings[0].id}
+                                             businessName={vendor.businessName}
+                                             variant="full"
+                                             className="!w-full !py-4 !bg-[#0f172a]/50 !border !border-white/5 !text-white !rounded-[10px] !font-black !text-sm !uppercase !tracking-widest !flex !items-center !justify-center !gap-3 hover:!bg-[#0f172a]/80"
+                                             icon={<MessageCircle className="w-5 h-5" />}
+                                             label="CHAT"
+                                         />
+                                     )}
+ 
+                                     {/* Chat Now & Enquire Button (Gradient) */}
+                                     {vendor.listings?.[0] && (
+                                         <ChatTrigger
+                                             businessId={vendor.listings[0].id}
+                                             businessName={vendor.businessName}
+                                             variant="full"
+                                             className="!w-full !py-4 !bg-gradient-to-r !from-[#8b5cf6] !to-[#3b82f6] !text-white !rounded-[10px] !font-black !text-base !border-none !shadow-xl !shadow-indigo-500/20 !flex !items-center !justify-center !gap-3"
+                                             icon={<Send className="w-5 h-5" />}
+                                             label="Chat Now & Enquire"
+                                         />
+                                     )}
+                                 </div>
+ 
+                                 {/* Card Footer */}
+                                 <div className="mt-8 pt-6 border-t border-white/10 flex items-center justify-between">
+                                     <div className="flex items-center gap-2 text-slate-400 text-sm">
+                                         <Globe className="w-4 h-4" />
+                                         <span>Website</span>
+                                     </div>
+                                     <a 
+                                         href={vendor.socialLinks?.find(l => l.platform.toLowerCase() === 'website')?.url || '#'} 
+                                         target="_blank" 
+                                         rel="noopener noreferrer"
+                                         className="text-white text-sm font-black underline underline-offset-4 decoration-2 decoration-[#3b82f6] hover:text-[#3b82f6] transition-colors"
+                                     >
+                                         Visit Site
+                                     </a>
+                                 </div>
+                             </div>
+
+                             {/* Business Hours */}
+                             <div className="bg-white rounded-[10px] border border-[#c4c6d0] p-6 lg:p-8 shadow-sm">
+                                 <div className="flex items-center justify-between mb-6">
+                                     <h3 className="text-xl font-black text-[#00346f] flex items-center gap-3">
+                                         <Clock className="w-5 h-5" /> Business Hours
+                                     </h3>
+                                     {businessStatus && (
+                                         <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${businessStatus.isOpen ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-red-50 text-red-500 border-red-100'}`}>
+                                             {businessStatus.label}
+                                         </div>
+                                     )}
+                                 </div>
+                                 <div className="space-y-4">
+                                     {(sortedHours.length > 0 ? sortedHours : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(d => ({ dayOfWeek: d, isOpen: true, openTime: '09:00', closeTime: '18:00' }))).map((hour: any, i: number) => {
+                                         const isToday = hour.dayOfWeek.toLowerCase() === currentDay.toLowerCase();
+                                         return (
+                                             <div key={i} className={`flex justify-between items-center py-2 border-b border-[#c4c6d0]/30 last:border-0 ${isToday ? 'bg-blue-50/50 -mx-4 px-4 rounded-lg' : ''}`}>
+                                                 <span className={`font-black text-sm uppercase tracking-widest ${isToday ? 'text-[#00346f]' : 'text-slate-500'}`}>
+                                                     {hour.dayOfWeek}
+                                                     {isToday && <span className="ml-2 text-[8px] bg-[#00346f] text-white px-1.5 py-0.5 rounded-full">Today</span>}
+                                                 </span>
+                                                 <span className={`text-xs font-black ${hour.isOpen ? 'text-emerald-600' : 'text-red-500'} uppercase tracking-widest`}>
+                                                     {hour.isOpen ? `${hour.openTime?.substring(0, 5)} - ${hour.closeTime?.substring(0, 5)}` : 'Closed'}
+                                                 </span>
+                                             </div>
+                                         );
+                                     })}
+                                 </div>
+                             </div>
+
+
+                        </div>
+                    </aside>
+                </div>
+            </div>
+
+            <Footer />
         </div>
     );
 }

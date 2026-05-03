@@ -27,6 +27,7 @@ export default function Navbar() {
     const [showBell, setShowBell] = useState(false);
     const [activeSub, setActiveSub] = useState<any>(null);
     const [loadingSub, setLoadingSub] = useState(true);
+    const [hasClickedPush, setHasClickedPush] = useState(false);
     const bellRef = useRef<HTMLDivElement>(null);
 
     const fetchNotifications = useCallback(async () => {
@@ -122,8 +123,13 @@ export default function Navbar() {
                     api.categories.getPopular(10),
                     api.cities.getPopular()
                 ]);
-                setCategories(cats.slice(0, 10));
-                setCities(cityData.slice(0, 10));
+
+                if (Array.isArray(cats)) {
+                    setCategories(cats.slice(0, 10));
+                }
+                if (Array.isArray(cityData)) {
+                    setCities(cityData.slice(0, 10));
+                }
             } catch (error) {
                 console.error('Error fetching navbar data:', error);
             }
@@ -355,16 +361,16 @@ export default function Navbar() {
                                     </div>
                                 </Link>
 
-                                {/* 🔕 Enable Push Notifications button – only shown if not yet granted */}
-                                {pushSupported && !pushSubscribed && pushPermission === 'default' && (
+                                {/* 🔕 Enable Push Notifications button – only shown if not yet granted and not clicked in this session */}
+                                {pushSupported && !pushSubscribed && pushPermission === 'default' && !hasClickedPush && (
                                     <button
-                                        onClick={enablePush}
+                                        onClick={() => { enablePush(); setHasClickedPush(true); }}
                                         disabled={pushLoading}
                                         title="Enable push notifications"
                                         className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 transition-all active:scale-95 disabled:opacity-60"
                                     >
                                         <BellRing className={`w-3.5 h-3.5 ${pushLoading ? 'animate-bounce' : ''}`} />
-                                        {pushLoading ? 'Enabling…' : 'Enable Push'}
+                                        {pushLoading ? 'Enabling…' : 'Notify Me'}
                                     </button>
                                 )}
 
@@ -481,13 +487,13 @@ export default function Navbar() {
                                     href="/login"
                                     className="btn-orbit-ghost"
                                 >
-                                    Login
+                                    LOGIN
                                 </Link>
                                 <Link
                                     href="/register?role=vendor"
                                     className="btn-orbit-accent whitespace-nowrap"
                                 >
-                                    Add Business
+                                    ADD BUSINESS
                                 </Link>
                             </div>
                         )}
@@ -504,8 +510,8 @@ export default function Navbar() {
             </div>
 
             {/* Mobile Menu Drawer */}
-            <div className={`lg:hidden fixed inset-0 z-50 transition-all duration-300 pointer-events-none ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0'}`}>
-                <div className={`absolute top-20 left-0 right-0 bg-white border-b border-slate-100 shadow-2xl transition-all duration-300 pointer-events-auto ${isMobileMenuOpen ? 'translate-y-0' : '-translate-y-full'}`}>
+            <div className={`lg:hidden fixed inset-0 z-50 transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none invisible'}`}>
+                <div className={`absolute top-20 left-0 right-0 bg-white border-b border-slate-100 shadow-2xl transition-all duration-300 ${isMobileMenuOpen ? 'translate-y-0' : '-translate-y-full'}`}>
                     <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-5rem)]">
                         <div className="grid grid-cols-1 gap-4">
                             <Link href="/" className="p-4 rounded-2xl bg-slate-50 text-center font-bold text-slate-900 border border-transparent active:border-slate-200">Home</Link>
@@ -525,6 +531,20 @@ export default function Navbar() {
                                 </Link>
                             </div>
                         </div>
+
+                        {/* Push Notifications for Mobile */}
+                        {user && pushSupported && !pushSubscribed && pushPermission === 'default' && !hasClickedPush && (
+                            <div className="pt-2 px-2">
+                                <button
+                                    onClick={() => { enablePush(); setHasClickedPush(true); setIsMobileMenuOpen(false); }}
+                                    disabled={pushLoading}
+                                    className="flex items-center justify-center gap-3 w-full p-4 rounded-2xl bg-indigo-50 text-indigo-600 font-bold border border-indigo-100 active:scale-95 transition-all"
+                                >
+                                    <BellRing className={`w-5 h-5 ${pushLoading ? 'animate-bounce' : ''}`} />
+                                    {pushLoading ? 'Enabling Push...' : 'Enable Push Notifications'}
+                                </button>
+                            </div>
+                        )}
 
                         {!user && (
                             <div className="space-y-3 pt-4 border-t border-slate-100">

@@ -49,24 +49,24 @@ export default function MyInquiries() {
             </div>
 
             {inquiries.length === 0 ? (
-                <div className="bg-[#faf8ff] p-12 rounded-[32px] border border-dashed border-[#e2e8f0] text-center">
+                <div className="bg-[#faf8ff] p-12  rounded-[15px] border border-dashed border-[#e2e8f0] text-center">
                     <p className="text-[#64748b] font-bold italic text-sm">No recent inquiries or claims yet.</p>
                 </div>
             ) : (
                 <div className="grid gap-5">
                     {inquiries.slice(0, 5).map((inq, idx) => (
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: idx * 0.1 }}
-                            key={inq.id} 
+                            key={inq.id}
                             className="bg-white p-6 rounded-[24px] border border-[#e2e8f0] hover:border-[#004a99]/20 hover:shadow-[0_15px_40px_rgb(0,0,0,0.05)] transition-all group"
                         >
                             <div className="flex justify-between items-start mb-4">
                                 <div className="flex items-center gap-4">
                                     <div className="w-12 h-12 rounded-[16px] bg-[#faf8ff] overflow-hidden flex-shrink-0 shadow-sm border border-[#e2e8f0]">
-                                        <img 
-                                            src={getImageUrl(inq.business?.logoUrl || inq.business?.images?.[0]) || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'} 
+                                        <img
+                                            src={getImageUrl(inq.business?.logoUrl || inq.business?.images?.[0]) || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}
                                             alt={inq.business?.title}
                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                         />
@@ -80,9 +80,8 @@ export default function MyInquiries() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
-                                    inq.status === 'new' ? 'bg-[#f0f4ff] text-[#004a99] border border-[#004a99]/10' : 'bg-[#faf8ff] text-[#64748b] border border-[#e2e8f0]'
-                                }`}>
+                                <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${inq.status === 'new' ? 'bg-[#f0f4ff] text-[#004a99] border border-[#004a99]/10' : 'bg-[#faf8ff] text-[#64748b] border border-[#e2e8f0]'
+                                    }`}>
                                     {inq.status}
                                 </div>
                             </div>
@@ -96,7 +95,7 @@ export default function MyInquiries() {
                                     <Clock className="w-3.5 h-3.5" />
                                     {formatDistanceToNow(new Date(inq.createdAt), { addSuffix: true })}
                                 </div>
-                                <Link 
+                                <Link
                                     href={`/business/${inq.business?.slug}`}
                                     className="text-[10px] font-black uppercase tracking-[0.2em] text-[#004a99] flex items-center gap-1.5 group-hover:gap-3 transition-all"
                                 >

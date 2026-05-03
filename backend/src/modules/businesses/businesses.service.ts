@@ -210,12 +210,18 @@ export class BusinessesService {
             categoryId,
             categorySlug,
             minRating,
-            priceRange,
             featuredOnly,
             verifiedOnly,
             openNow,
             sortBy,
             userId,
+            country,
+            state,
+            area,
+            subcategoryId,
+            categoryIds,
+            amenityIds,
+            minReviews,
         } = searchDto;
         const skip = calculateSkip(page, limit);
 
@@ -270,13 +276,12 @@ export class BusinessesService {
                     const term = searchTerms[i];
                     qb.andWhere(
                         new Brackets((innerQb) => {
-                            innerQb.where(`"listing"."name" ILIKE :term${i}`)
-                                .orWhere(`"listing"."description" ILIKE :term${i}`)
-                                .orWhere(`"listing"."meta_keywords" ILIKE :term${i}`)
-                                .orWhere(`"listing"."search_keywords"::text ILIKE :term${i}`)
-                                .orWhere(`"vendor"."business_name" ILIKE :term${i}`);
-                        }),
-                        { [`term${i}`]: `%${term}%` }
+                            innerQb.where(`"listing"."name" ILIKE :term${i}`, { [`term${i}`]: `%${term}%` })
+                                .orWhere(`"listing"."description" ILIKE :term${i}`, { [`term${i}`]: `%${term}%` })
+                                .orWhere(`"listing"."meta_keywords" ILIKE :term${i}`, { [`term${i}`]: `%${term}%` })
+                                .orWhere(`"listing"."search_keywords"::text ILIKE :term${i}`, { [`term${i}`]: `%${term}%` })
+                                .orWhere(`"vendor"."business_name" ILIKE :term${i}`, { [`term${i}`]: `%${term}%` });
+                        })
                     );
                 }
             }));
@@ -286,7 +291,17 @@ export class BusinessesService {
             idQueryBuilder.andWhere('category.id = :categoryId', { categoryId: searchDto.categoryId });
         }
         if (searchDto.categorySlug) {
-            idQueryBuilder.andWhere('category.slug = :categorySlug', { categorySlug: searchDto.categorySlug });
+            idQueryBuilder.andWhere(
+                new Brackets((qb) => {
+                    qb.where('category.slug = :categorySlug', { categorySlug: searchDto.categorySlug })
+                      .orWhere('category.name ILIKE :categoryName', { categoryName: `%${searchDto.categorySlug.replace(/-/g, ' ')}%` })
+                      .orWhere('"listing"."name" ILIKE :categoryName', { categoryName: `%${searchDto.categorySlug.replace(/-/g, ' ')}%` })
+                      .orWhere('"listing"."description" ILIKE :categoryName', { categoryName: `%${searchDto.categorySlug.replace(/-/g, ' ')}%` })
+                      .orWhere('"listing"."meta_keywords" ILIKE :categoryName', { categoryName: `%${searchDto.categorySlug.replace(/-/g, ' ')}%` })
+                      .orWhere('"listing"."search_keywords"::text ILIKE :categoryName', { categoryName: `%${searchDto.categorySlug.replace(/-/g, ' ')}%` })
+                      .orWhere('"vendor"."business_name" ILIKE :categoryName', { categoryName: `%${searchDto.categorySlug.replace(/-/g, ' ')}%` });
+                })
+            );
         }
         if (city) {
             idQueryBuilder.andWhere('listing.city ILIKE :city', { city: `%${city}%` });
@@ -294,14 +309,48 @@ export class BusinessesService {
         if (minRating) {
             idQueryBuilder.andWhere('listing.averageRating >= :minRating', { minRating });
         }
-        if (priceRange) {
-            idQueryBuilder.andWhere('listing.priceRange = :priceRange', { priceRange });
-        }
         if (featuredOnly) {
             idQueryBuilder.andWhere('listing.isFeatured = :featured', { featured: true });
         }
         if (verifiedOnly) {
             idQueryBuilder.andWhere('listing.isVerified = :verified', { verified: true });
+        }
+        if (country) {
+            idQueryBuilder.andWhere('listing.country ILIKE :country', { country: `%${country}%` });
+        }
+        if (state) {
+            idQueryBuilder.andWhere('listing.state ILIKE :state', { state: `%${state}%` });
+        }
+        if (area) {
+            idQueryBuilder.andWhere('listing.address ILIKE :area', { area: `%${area}%` });
+        }
+        if (subcategoryId) {
+            idQueryBuilder.andWhere('category.id = :subcategoryId', { subcategoryId });
+        }
+        if (categoryIds) {
+            const ids = categoryIds.split(',').filter(id => id.length > 0);
+            if (ids.length > 0) {
+                idQueryBuilder.andWhere('category.id IN (:...catIds)', { catIds: ids });
+            }
+        }
+        if (minReviews) {
+            idQueryBuilder.andWhere('listing.totalReviews >= :minReviews', { minReviews });
+        }
+
+        // Amenities / Services / Facilities
+        if (amenityIds) {
+            const ids = amenityIds.split(',').filter(id => id.length > 0);
+            if (ids.length > 0) {
+                idQueryBuilder.andWhere(qb => {
+                    const subQuery = qb.subQuery()
+                        .select('ba.business_id')
+                        .from('business_amenities', 'ba')
+                        .where('ba.amenity_id IN (:...amenityIds)')
+                        .getQuery();
+                    return `listing.id IN ${subQuery}`;
+                });
+                idQueryBuilder.setParameter('amenityIds', ids);
+            }
         }
 
         // Open Now filter (requires join, but only for filtering)
@@ -310,11 +359,15 @@ export class BusinessesService {
             const day = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
             const time = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
             
-            idQueryBuilder
-                .leftJoin('listing.businessHours', 'filterHours')
-                .andWhere('filterHours.dayOfWeek = :day', { day })
-                .andWhere('filterHours.isOpen = :isOpen', { isOpen: true })
-                .andWhere(':time BETWEEN filterHours.openTime AND filterHours.closeTime', { time });
+            idQueryBuilder.andWhere(qb => {
+                const subQuery = qb.subQuery()
+                    .select('bh.business_id')
+                    .from('business_hours', 'bh')
+                    .where('bh.day_of_week = :day AND bh.is_open = :isOpen AND :time BETWEEN bh.open_time AND bh.close_time')
+                    .getQuery();
+                return `listing.id IN ${subQuery}`;
+            });
+            idQueryBuilder.setParameters({ day, isOpen: true, time });
         }
 
         // Sorting & Pagination on IDs
@@ -333,9 +386,39 @@ export class BusinessesService {
                 idQueryBuilder.addOrderBy('listing.averageRating', 'DESC');
                 idQueryBuilder.addGroupBy('listing.averageRating');
                 break;
+            case SearchSortBy.NEWEST:
             case 'newest':
                 idQueryBuilder.addOrderBy('listing.createdAt', 'DESC');
                 idQueryBuilder.addGroupBy('listing.createdAt');
+                break;
+            case SearchSortBy.MOST_REVIEWED:
+            case 'most_reviewed':
+                idQueryBuilder.addOrderBy('listing.totalReviews', 'DESC');
+                idQueryBuilder.addGroupBy('listing.totalReviews');
+                break;
+            case SearchSortBy.FEATURED_FIRST:
+            case 'featured_first':
+                idQueryBuilder
+                    .addOrderBy('listing.isSponsored', 'DESC')
+                    .addOrderBy('listing.isFeatured', 'DESC')
+                    .addOrderBy('listing.averageRating', 'DESC');
+                
+                idQueryBuilder.addGroupBy('listing.isSponsored');
+                idQueryBuilder.addGroupBy('listing.isFeatured');
+                idQueryBuilder.addGroupBy('listing.averageRating');
+                break;
+            case SearchSortBy.DISTANCE:
+            case 'distance':
+                // Distance sorting is usually handled later or via raw query with ST_Distance
+                // For now, if lat/lng present, we'll keep default but we could add a calculated distance field
+                idQueryBuilder
+                    .addOrderBy('listing.isSponsored', 'DESC')
+                    .addOrderBy('listing.isFeatured', 'DESC')
+                    .addOrderBy('listing.averageRating', 'DESC');
+                
+                idQueryBuilder.addGroupBy('listing.isSponsored');
+                idQueryBuilder.addGroupBy('listing.isFeatured');
+                idQueryBuilder.addGroupBy('listing.averageRating');
                 break;
             default:
                 idQueryBuilder

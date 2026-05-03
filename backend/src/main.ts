@@ -150,8 +150,10 @@ async function bootstrap() {
         }));
     }
 
+    const port = configService.get('PORT') || 3001;
+
     if (showSwagger) {
-        const swaggerConfig = new DocumentBuilder()
+        const swaggerBuilder = new DocumentBuilder()
             .setTitle('Local Business Discovery Platform API')
             .setDescription(
                 'Hyperlocal business discovery platform API documentation',
@@ -167,13 +169,24 @@ async function bootstrap() {
             .addTag('leads')
             .addTag('subscriptions')
             .addTag('search')
-            .addTag('admin')
-            .addServer('http://process.env.NEXT_PUBLIC_API_URL', 'Local development server')
-            .addServer(
-                'https://local-business-listing-directctory-production.up.railway.app',
+            .addTag('admin');
+
+        // Add servers based on environment priority
+        if (nodeEnv === 'production') {
+            swaggerBuilder.addServer(
+                configService.get('BACKEND_URL') || 'https://local-business-listing-directory-production.up.railway.app',
                 'Production server',
-            )
-            .build();
+            );
+            swaggerBuilder.addServer(`http://localhost:${port}`, 'Local development server');
+        } else {
+            swaggerBuilder.addServer(`http://localhost:${port}`, 'Local development server');
+            swaggerBuilder.addServer(
+                configService.get('BACKEND_URL') || 'https://local-business-listing-directory-production.up.railway.app',
+                'Production server',
+            );
+        }
+
+        const swaggerConfig = swaggerBuilder.build();
 
         const document = SwaggerModule.createDocument(app, swaggerConfig);
 
@@ -195,7 +208,6 @@ async function bootstrap() {
      * -----------------------
      */
 
-    const port = configService.get('PORT') || 3001;
 
     console.log(`🔌 Database Mode: ${configService.get('NODE_ENV') === 'production' ? 'Migrations' : 'Synchronize'}`);
     await app.listen(port, '0.0.0.0');

@@ -201,6 +201,12 @@ export default function BusinessDetailClient({
 
       const { Map } = await (window as any).google.maps.importLibrary("maps");
 
+      // Final check to ensure container is still in DOM before creating instance
+      if (!mapContainerRef.current) {
+        initInProgress.current = false;
+        return;
+      }
+
       if (!mapRef.current) {
         // Initialize the Map
         mapRef.current = new Map(mapContainerRef.current, {
@@ -212,7 +218,6 @@ export default function BusinessDetailClient({
           fullscreenControl: true,
           maxZoom: 19,
           minZoom: 2,
-          // Remove DEMO_MAP_ID as it can cause blank maps if not authorized
         });
 
         console.log("[BusinessDetail] Map instance created");
@@ -264,7 +269,17 @@ export default function BusinessDetailClient({
       initMap();
     });
 
-    return () => window.cancelAnimationFrame(frameId);
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      // Cleanup map listeners to avoid Node.removeChild (NotFoundError)
+      if (mapRef.current && (window as any).google?.maps?.event) {
+        try {
+          (window as any).google.maps.event.clearInstanceListeners(mapRef.current);
+        } catch (e) {
+          console.warn("[BusinessDetail] Map cleanup failed:", e);
+        }
+      }
+    };
   }, [loading, mapLoaded, business, activeTab]);
 
   useEffect(() => {

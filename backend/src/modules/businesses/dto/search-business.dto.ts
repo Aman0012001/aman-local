@@ -17,6 +17,8 @@ export enum SearchSortBy {
     DISTANCE = 'distance',
     RATING = 'rating',
     NEWEST = 'newest',
+    MOST_REVIEWED = 'most_reviewed',
+    FEATURED_FIRST = 'featured_first',
 }
 
 export class SearchBusinessDto extends PaginationDto {
@@ -72,10 +74,6 @@ export class SearchBusinessDto extends PaginationDto {
     @Max(5)
     minRating?: number;
 
-    @ApiPropertyOptional({ example: '$$', enum: ['$', '$$', '$$$', '$$$$'] })
-    @IsOptional()
-    @IsString()
-    priceRange?: string;
 
     @ApiPropertyOptional({ default: false })
     @IsOptional()
@@ -104,4 +102,40 @@ export class SearchBusinessDto extends PaginationDto {
     @IsOptional()
     @IsUUID()
     userId?: string;
+
+    @ApiPropertyOptional({ example: 'Pakistan' })
+    @IsOptional()
+    @IsString()
+    country?: string;
+
+    @ApiPropertyOptional({ example: 'Punjab' })
+    @IsOptional()
+    @IsString()
+    state?: string;
+
+    @ApiPropertyOptional({ example: 'Gulberg' })
+    @IsOptional()
+    @IsString()
+    area?: string;
+
+    @ApiPropertyOptional({ description: 'Subcategory UUID' })
+    @IsOptional()
+    @IsUUID()
+    subcategoryId?: string;
+
+    @ApiPropertyOptional({ description: 'Multi-select category UUIDs' })
+    @IsOptional()
+    @IsString() // TypeORM/ClassValidator handle as CSV string in query usually, or we parse array
+    categoryIds?: string;
+
+    @ApiPropertyOptional({ description: 'Amenity UUIDs (Services/Facilities)' })
+    @IsOptional()
+    @IsString()
+    amenityIds?: string;
+
+    @ApiPropertyOptional({ example: 10 })
+    @IsOptional()
+    @Type(() => Number)
+    @IsNumber()
+    minReviews?: number;
 }

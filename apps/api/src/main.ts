@@ -16,7 +16,7 @@ async function bootstrap() {
     exclude: [{ path: '/', method: RequestMethod.GET }],
   });
 
-  const port = process.env.PORT || 3005;
+  const port = process.env.PORT || 3001;
   await app.listen(port);
   console.log(`Backend running on http://localhost:${port}/api/v1`);
 }

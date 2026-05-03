@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-    ShieldAlert, AlertTriangle, Clock, CheckCircle2, XCircle, 
-    MessageSquare, Store, User as UserIcon, RefreshCw, 
+import {
+    ShieldAlert, AlertTriangle, Clock, CheckCircle2, XCircle,
+    MessageSquare, Store, User as UserIcon, RefreshCw,
     ChevronRight, ExternalLink, Filter, Search, Loader2,
     Flag, ShieldCheck, AlertCircle
 } from 'lucide-react';
@@ -31,7 +31,7 @@ export default function AdminReportsPage() {
             // Fetch flagged reviews
             const reviewRes = await api.reviews.adminGetAll({ isSuspicious: 'true', limit: 10 });
             setReviews(reviewRes.data || []);
-            
+
             // Fetch pending businesses
             const businessRes = await api.admin.getBusinesses(1, 10, 'pending');
             setBusinesses(businessRes.data || []);
@@ -87,8 +87,8 @@ export default function AdminReportsPage() {
                     </h1>
                     <p className="text-slate-500 font-medium text-sm">Review flagged content and pending submissions that require attention.</p>
                 </div>
-                
-                <button 
+
+                <button
                     onClick={fetchData}
                     disabled={loading}
                     className="flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 rounded-2xl font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm active:scale-95 disabled:opacity-50"
@@ -100,7 +100,7 @@ export default function AdminReportsPage() {
 
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <button 
+                <button
                     onClick={() => setActiveTab('reviews')}
                     className={`p-6 rounded-[24px] border-2 text-left transition-all ${activeTab === 'reviews' ? 'bg-red-50/50 border-red-500/20 ring-4 ring-red-500/5' : 'bg-white border-slate-100 hover:border-slate-200'}`}
                 >
@@ -111,7 +111,7 @@ export default function AdminReportsPage() {
                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">Flagged Reviews</p>
                 </button>
 
-                <button 
+                <button
                     onClick={() => setActiveTab('businesses')}
                     className={`p-6 rounded-[24px] border-2 text-left transition-all ${activeTab === 'businesses' ? 'bg-amber-50/50 border-amber-500/20 ring-4 ring-amber-500/5' : 'bg-white border-slate-100 hover:border-slate-200'}`}
                 >
@@ -122,7 +122,7 @@ export default function AdminReportsPage() {
                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">Pending Listings</p>
                 </button>
 
-                <button 
+                <button
                     onClick={() => setActiveTab('users')}
                     className={`p-6 rounded-[24px] border-2 text-left transition-all ${activeTab === 'users' ? 'bg-slate-900 border-slate-900 ring-4 ring-slate-950/5' : 'bg-white border-slate-100 hover:border-slate-200'}`}
                 >
@@ -135,7 +135,7 @@ export default function AdminReportsPage() {
             </div>
 
             {/* Content Area */}
-            <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden min-h-[500px]">
+            <div className="bg-white  rounded-[15px] border border-slate-100 shadow-sm overflow-hidden min-h-[500px]">
                 <div className="p-8 border-b border-slate-50 flex items-center justify-between">
                     <h3 className="font-black text-slate-900 text-xl flex items-center gap-3">
                         {activeTab === 'reviews' && <><MessageSquare className="w-5 h-5 text-red-500" /> Flagged Content</>}
@@ -152,7 +152,7 @@ export default function AdminReportsPage() {
                     ) : (
                         <AnimatePresence mode="wait">
                             {activeTab === 'reviews' && (
-                                <motion.div 
+                                <motion.div
                                     key="reviews"
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -183,7 +183,7 @@ export default function AdminReportsPage() {
                                                                 </span>
                                                             </div>
                                                         </div>
-                                                        
+
                                                         <p className="text-slate-600 leading-relaxed text-sm font-medium mb-4 italic">
                                                             "{review.comment}"
                                                         </p>
@@ -200,13 +200,13 @@ export default function AdminReportsPage() {
                                                                 )}
                                                             </div>
                                                             <div className="flex items-center gap-2">
-                                                                <button 
+                                                                <button
                                                                     onClick={() => handleModerateReview(review.id, { isApproved: false, isSuspicious: false })}
                                                                     className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black text-red-500 hover:bg-red-50 hover:border-red-200 transition-all uppercase tracking-widest"
                                                                 >
                                                                     Reject & Remove
                                                                 </button>
-                                                                <button 
+                                                                <button
                                                                     onClick={() => handleModerateReview(review.id, { isApproved: true, isSuspicious: false })}
                                                                     className="px-4 py-2 bg-emerald-500 border border-emerald-600 rounded-xl text-[10px] font-black text-white hover:bg-emerald-600 transition-all uppercase tracking-widest shadow-sm"
                                                                 >
@@ -223,7 +223,7 @@ export default function AdminReportsPage() {
                             )}
 
                             {activeTab === 'businesses' && (
-                                <motion.div 
+                                <motion.div
                                     key="businesses"
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -266,14 +266,14 @@ export default function AdminReportsPage() {
                                                                 </div>
                                                             </div>
                                                             <div className="flex items-center gap-2">
-                                                                <button 
+                                                                <button
                                                                     onClick={() => handleModerateBusiness(business.id, 'rejected')}
                                                                     className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-red-500 hover:border-red-100 transition-all shadow-sm"
                                                                     title="Reject Listing"
                                                                 >
                                                                     <XCircle className="w-5 h-5" />
                                                                 </button>
-                                                                <button 
+                                                                <button
                                                                     onClick={() => handleModerateBusiness(business.id, 'approved')}
                                                                     className="px-6 py-3 bg-slate-900 border border-slate-950 rounded-xl text-[11px] font-black text-white hover:bg-slate-800 transition-all uppercase tracking-widest shadow-lg shadow-slate-900/20"
                                                                 >
@@ -290,7 +290,7 @@ export default function AdminReportsPage() {
                             )}
 
                             {activeTab === 'users' && (
-                                <motion.div 
+                                <motion.div
                                     key="users"
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}

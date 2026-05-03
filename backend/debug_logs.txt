@@ -891,3 +891,141 @@ NotFoundException: Listing not found
 [2026-05-01T23:00:24.955Z] findBySlug: test-mnh4cfax (User: dd@gmail.com)
 [2026-05-01T23:00:26.414Z] findBySlug: test-mnh4cfax - Found in DB. Status: approved
 [2026-05-01T23:00:26.837Z] findBySlug: test-mnh4cfax - SUCCESS
+[2026-05-01T23:13:00.970Z] findBySlug: karachi-auto-care-workshop-mmgs0upa (User: dd@gmail.com)
+[2026-05-01T23:13:02.240Z] findBySlug: karachi-auto-care-workshop-mmgs0upa - Found in DB. Status: approved
+[2026-05-01T23:13:02.639Z] findBySlug: karachi-auto-care-workshop-mmgs0upa - SUCCESS
+[2026-05-02T12:14:55.362Z] findBySlug: restaurants-best-pizza-mnm6c77s (User: dd@gmail.com)
+[2026-05-02T12:14:56.623Z] findBySlug: restaurants-best-pizza-mnm6c77s - Found in DB. Status: approved
+[2026-05-02T12:14:56.922Z] findBySlug: restaurants-best-pizza-mnm6c77s - SUCCESS
+[2026-05-02T12:27:17.996Z] findBySlug: restaurants-best-pizza-mnm6c77s (User: dd@gmail.com)
+[2026-05-02T12:27:18.641Z] findBySlug: restaurants-best-pizza-mnm6c77s - Found in DB. Status: approved
+[2026-05-02T12:27:18.781Z] findBySlug: restaurants-best-pizza-mnm6c77s - SUCCESS
+[2026-05-02T12:45:05.528Z] findBySlug: restaurants-best-pizza-mnm6c77s (User: dd@gmail.com)
+[2026-05-02T12:45:07.220Z] findBySlug: restaurants-best-pizza-mnm6c77s - Found in DB. Status: approved
+[2026-05-02T12:45:07.424Z] findBySlug: restaurants-best-pizza-mnm6c77s - SUCCESS
+[2026-05-02T12:50:42.964Z] findBySlug: smilecare-dental-clinic-mnd2rjh5 (User: dd@gmail.com)
+[2026-05-02T12:50:44.270Z] findBySlug: smilecare-dental-clinic-mnd2rjh5 - Found in DB. Status: approved
+[2026-05-02T12:50:44.572Z] findBySlug: smilecare-dental-clinic-mnd2rjh5 - SUCCESS
+[2026-05-02T13:02:26.316Z] findBySlug: smilecare-dental-clinic-mnd2rjh5 (User: dd@gmail.com)
+[2026-05-02T13:02:28.200Z] findBySlug: smilecare-dental-clinic-mnd2rjh5 - Found in DB. Status: approved
+[2026-05-02T13:02:28.510Z] findBySlug: smilecare-dental-clinic-mnd2rjh5 - SUCCESS
+[2026-05-02T13:33:02.634Z] findBySlug: restaurants-best-pizza-mnm6c77s (User: dd@gmail.com)
+[2026-05-02T13:33:03.606Z] findBySlug: restaurants-best-pizza-mnm6c77s - Found in DB. Status: approved
+[2026-05-02T13:33:03.914Z] findBySlug: restaurants-best-pizza-mnm6c77s - SUCCESS
+[2026-05-02T13:40:20.933Z] findBySlug: smilecare-dental-clinic-mnd2rjh5 (User: dd@gmail.com)
+[2026-05-02T13:40:22.571Z] findBySlug: smilecare-dental-clinic-mnd2rjh5 - Found in DB. Status: approved
+[2026-05-02T13:40:22.915Z] findBySlug: smilecare-dental-clinic-mnd2rjh5 - SUCCESS
+[2026-05-02T13:42:17.417Z] findBySlug: beauty-parlour-mnw25lti (User: dd@gmail.com)
+[2026-05-02T13:42:18.054Z] findBySlug: beauty-parlour-mnw25lti - Found in DB. Status: approved
+[2026-05-02T13:42:18.345Z] findBySlug: beauty-parlour-mnw25lti - SUCCESS
+[2026-05-02T13:57:34.376Z] findBySlug: smilecare-dental-clinic-mnd2rjh5 (User: dd@gmail.com)
+[2026-05-02T13:57:34.896Z] findBySlug: smilecare-dental-clinic-mnd2rjh5 - Found in DB. Status: approved
+[2026-05-02T13:57:35.042Z] findBySlug: smilecare-dental-clinic-mnd2rjh5 - SUCCESS
+[2026-05-02T14:04:53.413Z] findBySlug: test-mnh4czx8 (User: dd@gmail.com)
+[2026-05-02T14:04:54.331Z] findBySlug: test-mnh4czx8 - Found in DB. Status: approved
+[2026-05-02T14:04:54.627Z] findBySlug: test-mnh4czx8 - SUCCESS
+[2026-05-02T14:15:08.484Z] findBySlug: beauty-parlour-mnw25lti (User: dd@gmail.com)
+[2026-05-02T14:15:08.842Z] findBySlug: beauty-parlour-mnw25lti - Found in DB. Status: approved
+[2026-05-02T14:15:08.953Z] findBySlug: beauty-parlour-mnw25lti - SUCCESS
+[2026-05-02T14:15:10.692Z] findBySlug: test-mnh4czx8 (User: dd@gmail.com)
+[2026-05-02T14:15:11.165Z] findBySlug: test-mnh4czx8 - Found in DB. Status: approved
+[2026-05-02T14:15:11.277Z] findBySlug: test-mnh4czx8 - SUCCESS
+[2026-05-02T14:50:53.030Z] findBySlug: beauty-parlour-mnw25lti (User: dd@gmail.com)
+[2026-05-02T14:50:53.340Z] findBySlug: beauty-parlour-mnw25lti - Found in DB. Status: approved
+[2026-05-02T14:50:53.455Z] findBySlug: beauty-parlour-mnw25lti - SUCCESS
+[2026-05-02T15:08:43.314Z] findBySlug: beauty-parlour-mnw25lti (User: dd@gmail.com)
+[2026-05-02T15:08:43.719Z] findBySlug: beauty-parlour-mnw25lti - Found in DB. Status: approved
+[2026-05-02T15:08:43.828Z] findBySlug: beauty-parlour-mnw25lti - SUCCESS
+[2026-05-02T15:13:03.948Z] findBySlug: test2-mnhndp3n (User: dd@gmail.com)
+[2026-05-02T15:13:04.886Z] findBySlug: test2-mnhndp3n - Found in DB. Status: approved
+[2026-05-02T15:13:05.189Z] findBySlug: test2-mnhndp3n - SUCCESS
+[2026-05-02T15:14:48.039Z] findBySlug: beauty-parlour-mnw25lti (User: dd@gmail.com)
+[2026-05-02T15:14:48.334Z] findBySlug: beauty-parlour-mnw25lti - Found in DB. Status: approved
+[2026-05-02T15:14:48.458Z] findBySlug: beauty-parlour-mnw25lti - SUCCESS
+[2026-05-02T15:26:18.333Z] findBySlug: test-mnuqqfno (User: dd@gmail.com)
+[2026-05-02T15:26:19.008Z] findBySlug: test-mnuqqfno - Found in DB. Status: approved
+[2026-05-02T15:26:19.318Z] findBySlug: test-mnuqqfno - SUCCESS
+[2026-05-02T15:38:56.895Z] findBySlug: new-vrndor-listing-mnqa9xol (User: Public)
+[2026-05-02T15:38:57.533Z] findBySlug: new-vrndor-listing-mnqa9xol - Found in DB. Status: approved
+[2026-05-02T15:38:57.830Z] findBySlug: new-vrndor-listing-mnqa9xol - SUCCESS
+[2026-05-02T16:12:42.274Z] findBySlug: beauty-parlour-mnw25lti (User: dd@gmail.com)
+[2026-05-02T16:12:42.716Z] findBySlug: beauty-parlour-mnw25lti - Found in DB. Status: approved
+[2026-05-02T16:12:42.841Z] findBySlug: beauty-parlour-mnw25lti - SUCCESS
+[2026-05-02T16:32:00.637Z] findBySlug: test-mnh4czx8 (User: Public)
+[2026-05-02T16:32:01.281Z] findBySlug: test-mnh4czx8 - Found in DB. Status: approved
+[2026-05-02T16:32:01.576Z] findBySlug: test-mnh4czx8 - SUCCESS
+[2026-05-02T16:48:43.590Z] findBySlug: beauty-parlour-mnw25lti (User: dd@gmail.com)
+[2026-05-02T16:48:44.037Z] findBySlug: beauty-parlour-mnw25lti - Found in DB. Status: approved
+[2026-05-02T16:48:44.174Z] findBySlug: beauty-parlour-mnw25lti - SUCCESS
+[2026-05-02T17:56:44.429Z] findBySlug: beauty-parlour-mnw25lti (User: dd@gmail.com)
+[2026-05-02T17:56:45.059Z] findBySlug: beauty-parlour-mnw25lti - Found in DB. Status: approved
+[2026-05-02T17:56:45.363Z] findBySlug: beauty-parlour-mnw25lti - SUCCESS
+[2026-05-02T18:48:20.236Z] findBySlug: beauty-parlour-mnw25lti (User: Public)
+[2026-05-02T18:48:23.517Z] findBySlug: beauty-parlour-mnw25lti - Found in DB. Status: approved
+[2026-05-02T18:48:23.824Z] findBySlug: beauty-parlour-mnw25lti - SUCCESS
+[2026-05-02T19:01:34.264Z] findBySlug: beauty-parlour-mnw25lti (User: Public)
+[2026-05-02T19:01:34.621Z] findBySlug: beauty-parlour-mnw25lti - Found in DB. Status: approved
+[2026-05-02T19:01:34.760Z] findBySlug: beauty-parlour-mnw25lti - SUCCESS
+[2026-05-02T19:19:31.370Z] findBySlug: beauty-parlour-mnw25lti (User: Public)
+[2026-05-02T19:19:31.698Z] findBySlug: beauty-parlour-mnw25lti - Found in DB. Status: approved
+[2026-05-02T19:19:31.817Z] findBySlug: beauty-parlour-mnw25lti - SUCCESS
+[2026-05-02T19:24:06.632Z] findBySlug: bike-sell-mnw2g11t (User: Public)
+[2026-05-02T19:24:08.806Z] findBySlug: bike-sell-mnw2g11t - Found in DB. Status: approved
+[2026-05-02T19:24:09.112Z] findBySlug: bike-sell-mnw2g11t - SUCCESS
+[2026-05-02T19:30:47.247Z] findBySlug: test-mnh580gx (User: Public)
+[2026-05-02T19:30:49.044Z] findBySlug: test-mnh580gx - Found in DB. Status: approved
+[2026-05-02T19:30:49.339Z] findBySlug: test-mnh580gx - SUCCESS
+[2026-05-02T19:46:42.850Z] findBySlug: test-mnh580gx (User: Public)
+[2026-05-02T19:46:43.182Z] findBySlug: test-mnh580gx - Found in DB. Status: approved
+[2026-05-02T19:46:43.324Z] findBySlug: test-mnh580gx - SUCCESS
+[2026-05-02T19:50:50.823Z] findBySlug: test-mnh580gx (User: Public)
+[2026-05-02T19:50:54.531Z] findBySlug: test-mnh580gx - Found in DB. Status: approved
+[2026-05-02T19:50:54.834Z] findBySlug: test-mnh580gx - SUCCESS
+[2026-05-02T20:04:19.864Z] findBySlug: featured-coaching-institute-mna0aar3 (User: Public)
+[2026-05-02T20:04:20.585Z] findBySlug: featured-coaching-institute-mna0aar3 - Found in DB. Status: approved
+[2026-05-02T20:04:20.890Z] findBySlug: featured-coaching-institute-mna0aar3 - SUCCESS
+[2026-05-02T20:16:10.287Z] findBySlug: featured-coaching-institute-mna0aar3 (User: Public)
+[2026-05-02T20:16:11.114Z] findBySlug: featured-coaching-institute-mna0aar3 - Found in DB. Status: approved
+[2026-05-02T20:16:11.432Z] findBySlug: featured-coaching-institute-mna0aar3 - SUCCESS
+[2026-05-02T20:21:58.573Z] findBySlug: beauty-parlour-mnw25lti (User: Public)
+[2026-05-02T20:21:59.242Z] findBySlug: beauty-parlour-mnw25lti - Found in DB. Status: approved
+[2026-05-02T20:21:59.544Z] findBySlug: beauty-parlour-mnw25lti - SUCCESS
+[2026-05-02T20:36:06.021Z] findBySlug: bright-future-academy-mn8n7y7p (User: Public)
+[2026-05-02T20:36:06.851Z] findBySlug: bright-future-academy-mn8n7y7p - Found in DB. Status: approved
+[2026-05-02T20:36:07.152Z] findBySlug: bright-future-academy-mn8n7y7p - SUCCESS
+[2026-05-02T20:42:33.217Z] findBySlug: bright-future-academy-mn8n7y7p (User: Public)
+[2026-05-02T20:42:33.927Z] findBySlug: bright-future-academy-mn8n7y7p - Found in DB. Status: approved
+[2026-05-02T20:42:34.254Z] findBySlug: bright-future-academy-mn8n7y7p - SUCCESS
+[2026-05-02T20:47:01.808Z] findBySlug: karachi-auto-care-workshop-mmgs0upa (User: Public)
+[2026-05-02T20:47:02.120Z] findBySlug: karachi-auto-care-workshop-mmgs0upa - Found in DB. Status: approved
+[2026-05-02T20:47:02.244Z] findBySlug: karachi-auto-care-workshop-mmgs0upa - SUCCESS
+[2026-05-02T22:39:22.032Z] findBySlug: test-mnh580gx (User: Public)
+[2026-05-02T22:39:22.305Z] findBySlug: test-mnh580gx - Found in DB. Status: approved
+[2026-05-02T22:39:22.425Z] findBySlug: test-mnh580gx - SUCCESS
+[2026-05-02T23:52:53.993Z] findBySlug: hair-salon-mmp8acr9 (User: Public)
+[2026-05-02T23:52:55.058Z] findBySlug: hair-salon-mmp8acr9 - Found in DB. Status: approved
+[2026-05-02T23:52:55.367Z] findBySlug: hair-salon-mmp8acr9 - SUCCESS
+[2026-05-03T00:16:01.952Z] findBySlug: hair-salon-mmp8acr9 (User: Public)
+[2026-05-03T00:16:02.814Z] findBySlug: hair-salon-mmp8acr9 - Found in DB. Status: approved
+[2026-05-03T00:16:03.142Z] findBySlug: hair-salon-mmp8acr9 - SUCCESS
+[2026-05-03T00:20:35.176Z] findBySlug: test-mnh4czx8 (User: Public)
+[2026-05-03T00:20:37.659Z] findBySlug: test-mnh4czx8 - Found in DB. Status: approved
+[2026-05-03T00:20:38.325Z] findBySlug: test-mnh4czx8 (User: Public)
+[2026-05-03T00:20:38.898Z] findBySlug: test-mnh4czx8 - SUCCESS
+[2026-05-03T00:20:40.133Z] findBySlug: test-mnh4czx8 - Found in DB. Status: approved
+[2026-05-03T00:20:40.641Z] findBySlug: test-mnh4czx8 - SUCCESS
+[2026-05-03T00:49:23.670Z] findBySlug: test-mnh4czx8 (User: Public)
+[2026-05-03T00:49:24.333Z] findBySlug: test-mnh4czx8 - Found in DB. Status: approved
+[2026-05-03T00:49:24.656Z] findBySlug: test-mnh4czx8 - SUCCESS
+[2026-05-03T01:01:25.308Z] findBySlug: test-mnh4czx8 (User: Public)
+[2026-05-03T01:01:25.970Z] findBySlug: test-mnh4czx8 - Found in DB. Status: approved
+[2026-05-03T01:01:26.041Z] findBySlug: test-mnh4czx8 (User: Public)
+[2026-05-03T01:01:26.267Z] findBySlug: test-mnh4czx8 - SUCCESS
+[2026-05-03T01:01:26.929Z] findBySlug: test-mnh4czx8 - Found in DB. Status: approved
+[2026-05-03T01:01:27.215Z] findBySlug: test-mnh4czx8 - SUCCESS
+[2026-05-03T01:13:25.696Z] findBySlug: test-mnh4czx8 (User: Public)
+[2026-05-03T01:13:26.574Z] findBySlug: test-mnh4czx8 (User: Public)
+[2026-05-03T01:13:26.751Z] findBySlug: test-mnh4czx8 - Found in DB. Status: approved
+[2026-05-03T01:13:27.062Z] findBySlug: test-mnh4czx8 - SUCCESS
+[2026-05-03T01:13:27.200Z] findBySlug: test-mnh4czx8 - Found in DB. Status: approved
+[2026-05-03T01:13:27.330Z] findBySlug: test-mnh4czx8 - SUCCESS

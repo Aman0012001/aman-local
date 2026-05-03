@@ -60,11 +60,11 @@ export default function VendorLeadsInbox() {
 
     if (error) {
         return (
-            <div className="p-10 bg-[#fff1f2] rounded-[32px] border border-[#fecaca] text-center">
+            <div className="p-10 bg-[#fff1f2]  rounded-[15px] border border-[#fecaca] text-center">
                 <AlertCircle className="w-12 h-12 text-[#ba1a1a] mx-auto mb-4" />
                 <p className="text-[#131b2e] font-black tracking-tight mb-4">{error}</p>
-                <button 
-                    onClick={fetchRecentLeads} 
+                <button
+                    onClick={fetchRecentLeads}
                     className="px-6 py-3 bg-white border border-[#fecaca] rounded-2xl text-sm font-black text-[#ba1a1a] hover:bg-[#ba1a1a] hover:text-white transition-all shadow-sm active:scale-95"
                 >
                     Try Again
@@ -75,7 +75,7 @@ export default function VendorLeadsInbox() {
 
     if (leads.length === 0) {
         return (
-            <div className="p-12 bg-[#faf8ff] rounded-[32px] border border-dashed border-[#e2e8f0] text-center">
+            <div className="p-12 bg-[#faf8ff]  rounded-[15px] border border-dashed border-[#e2e8f0] text-center">
                 <div className="w-16 h-16 bg-white text-[#e2e8f0] rounded-[20px] flex items-center justify-center mx-auto mb-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                     <User className="w-8 h-8" />
                 </div>

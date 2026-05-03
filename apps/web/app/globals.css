@@ -45,19 +45,19 @@ select {
 
 @layer components {
   .btn-orbit-primary {
-    @apply bg-[#004a99] text-white px-6 py-3 rounded-[24px] font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-blue-500/20 transition-all duration-300 hover:scale-105 hover:bg-[#003c7d] active:scale-95 flex items-center justify-center gap-2;
+    @apply bg-[#004a99] text-white px-6 py-3 rounded-full font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-blue-500/20 transition-all duration-300 hover:scale-105 hover:bg-[#003c7d] active:scale-95 flex items-center justify-center gap-2;
   }
 
   .btn-orbit-secondary {
-    @apply border-2 border-[#004a99] text-[#004a99] px-6 py-3 rounded-[24px] font-black text-xs uppercase tracking-[0.2em] transition-all duration-300 hover:scale-105 hover:bg-blue-50 active:scale-95 flex items-center justify-center gap-2;
+    @apply border-2 border-[#004a99] text-[#004a99] px-6 py-3 rounded-full font-black text-xs uppercase tracking-[0.2em] transition-all duration-300 hover:scale-105 hover:bg-blue-50 active:scale-95 flex items-center justify-center gap-2;
   }
 
   .btn-orbit-accent {
-    @apply bg-[#ff7a00] text-white px-6 py-3 rounded-[24px] font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-orange-500/20 transition-all duration-300 hover:scale-105 hover:bg-[#e66e00] active:scale-95 flex items-center justify-center gap-2;
+    @apply bg-[#FF7A30] text-white px-8 py-3 rounded-[10px] font-black text-xs uppercase tracking-[0.25em] border border-white/10 transition-all duration-500 hover:scale-[1.02] hover:brightness-110 active:scale-95 flex items-center justify-center gap-2;
   }
 
   .btn-orbit-ghost {
-    @apply text-slate-500 px-6 py-3 rounded-[24px] font-black text-xs uppercase tracking-[0.2em] transition-all duration-300 hover:text-[#004a99] hover:bg-slate-50 active:scale-95 flex items-center justify-center gap-2;
+    @apply text-slate-500 px-6 py-3 rounded-full font-black text-xs uppercase tracking-[0.2em] transition-all duration-300 hover:text-[#004a99] hover:bg-slate-50 active:scale-95 flex items-center justify-center gap-2;
   }
 }
 
@@ -70,4 +70,45 @@ select {
     @apply bg-white/10 backdrop-blur-md border border-white/20;
   }
 
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #e2e8f0 transparent;
+}
+
+/* Review Scroll Animations */
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(-320px * 6 - 1.5rem * 6)); }
+}
+
+@keyframes scroll-reverse {
+  0% { transform: translateX(calc(-320px * 6 - 1.5rem * 6)); }
+  100% { transform: translateX(0); }
+}
+
+.animate-scroll {
+  animation: scroll 60s linear infinite;
+}
+
+.animate-scroll-reverse {
+  animation: scroll-reverse 60s linear infinite;
 }

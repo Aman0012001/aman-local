@@ -3,6 +3,7 @@
 import React from 'react';
 import { Megaphone, Calendar, Tag, Clock } from 'lucide-react';
 import Link from 'next/link';
+import ChatTrigger from './chat/ChatTrigger';
 
 interface OfferCardProps {
     offer: {
@@ -88,12 +89,21 @@ const OfferCard: React.FC<OfferCardProps> = ({ offer, onEnquire }) => {
                         <div />
                     )}
 
-                    <button
-                        onClick={onEnquire}
-                        className="btn-orbit-ghost !bg-slate-900 !text-white hover:!bg-orange-500 !px-5 !h-[36px] !rounded-[12px] !text-xs"
-                    >
-                        Enquire
-                    </button>
+                    {offer.business ? (
+                        <ChatTrigger
+                            businessId={offer.business.id}
+                            businessName={offer.business.title}
+                            label="Enquire"
+                            className="!bg-slate-900 !text-white hover:!bg-orange-500 !px-5 !h-[36px] !rounded-[12px] !text-xs border-none"
+                        />
+                    ) : (
+                        <button
+                            onClick={onEnquire}
+                            className="btn-orbit-ghost !bg-slate-900 !text-white hover:!bg-orange-500 !px-5 !h-[36px] !rounded-[12px] !text-xs"
+                        >
+                            Enquire
+                        </button>
+                    )}
                 </div>
             </div>
         </div >

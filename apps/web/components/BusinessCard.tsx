@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Star, MapPin, ShieldCheck, Clock, CheckCircle2, Users } from 'lucide-react';
+import { Star, MapPin, ShieldCheck, Clock, CheckCircle2, Users, Heart } from 'lucide-react';
 import { Business } from '../types/api';
 import { getImageUrl } from '../lib/api';
 import { getBusinessOpenStatus } from '../lib/business-status';
@@ -106,11 +106,6 @@ export default function BusinessCard({ business, variant = 'blue', layout = 'gri
                             alt={business.title}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s] grayscale-[0.2] group-hover:grayscale-0"
                         />
-                        {business.isVerified && (
-                            <div className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur-md rounded-full shadow-sm text-blue-600 border border-white">
-                                <ShieldCheck className="w-4 h-4 fill-blue-600/10" />
-                            </div>
-                        )}
                     </div>
 
                     {/* Minimalist Content */}
@@ -119,6 +114,8 @@ export default function BusinessCard({ business, variant = 'blue', layout = 'gri
                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600">
                                 {business.category?.name || 'Selection'}
                             </span>
+                            <div className="h-px w-4 bg-slate-200" />
+                            <StatusBadge status={(business as any).status} />
                             <div className="h-px w-4 bg-slate-200" />
                             <div className="flex items-center gap-1.5 font-black text-slate-900 text-xs">
                                 <Star className="w-3.5 h-3.5 fill-slate-900" />
@@ -139,6 +136,8 @@ export default function BusinessCard({ business, variant = 'blue', layout = 'gri
                             <div className="w-8 h-[2px] bg-slate-100 group-hover:bg-blue-600 group-hover:w-16 transition-all duration-500" />
                         </div>
                     </div>
+
+                    {/* Removed Enquire button from minimal variant as per request */}
                 </div>
             </Link>
         );
@@ -155,11 +154,6 @@ export default function BusinessCard({ business, variant = 'blue', layout = 'gri
                             alt={business.title}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         />
-                        {business.isFeatured && (
-                            <div className="absolute top-4 left-4 px-3 py-1 bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wider rounded-full shadow-lg">
-                                Featured
-                            </div>
-                        )}
                     </div>
 
                     {/* Content */}
@@ -170,9 +164,6 @@ export default function BusinessCard({ business, variant = 'blue', layout = 'gri
                                     <h3 className="text-2xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
                                         {business.title}
                                     </h3>
-                                    {business.isVerified && (
-                                        <ShieldCheck className="w-5 h-5 text-amber-500" />
-                                    )}
                                 </div>
                                 <div className="flex items-center gap-2 mb-1">
                                     <StatusBadge status={(business as any).status} />
@@ -209,7 +200,7 @@ export default function BusinessCard({ business, variant = 'blue', layout = 'gri
                                 <VendorOnlineBadge isOnline={business.vendor?.user?.isOnline} />
                                 <BusinessOpenBadge business={business} />
                             </div>
-                            <div className="btn-orbit-primary px-8 !text-sm">
+                            <div className={`px-10 py-4 rounded-xl text-sm font-black uppercase tracking-widest transition-all ${getButtonStyles()}`}>
                                 {getButtonText()}
                             </div>
                         </div>
@@ -221,65 +212,55 @@ export default function BusinessCard({ business, variant = 'blue', layout = 'gri
 
     return (
         <Link href={`/business/${business.slug}`} className="group h-full">
-            <div className="bg-white rounded-2xl border  overflow-hidden hover: hover:shadow-blue-500/5 transition-all duration-500 flex flex-col h-full">
+            <div className="bg-white rounded-[16px] border border-slate-200 overflow-hidden flex flex-col h-full hover:shadow-lg transition-all duration-300">
                 {/* Image Container */}
-                <div className="relative h-48 overflow-hidden">
+                <div className="relative h-48 w-full overflow-hidden">
                     <img
                         src={getImageUrl(business.coverImageUrl) || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=800'}
                         alt={business.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    {business.isVerified && (
-                        <div className="absolute top-4 right-4 px-3 py-1 bg-amber-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-full shadow-lg">
-                            Verified
-                        </div>
-                    )}
                 </div>
 
                 {/* Content */}
-                <div className="p-7 flex flex-col flex-grow">
-                    <div className="flex items-start justify-between mb-1">
-                        <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
-                            {business.title}
-                        </h3>
+                <div className="p-5 flex flex-col flex-grow">
+                    <h3 className="text-xl font-medium text-[#0000cc] line-clamp-1 mb-4">
+                        {business.title}
+                    </h3>
 
-                        {business.followersCount !== undefined && business.followersCount > 0 && (
-                            <div className="flex items-center gap-1 text-[10px] font-bold text-violet-500 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-100">
-                                <Users className="w-3 h-3" />
-                                {business.followersCount}
-                            </div>
-                        )}
+                    {/* Badges */}
+                    <div className="flex items-center gap-3 mb-5">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-[#e8f8f0] text-[#00B67A]">
+                            <CheckCircle2 className="w-4 h-4" /> Approved
+                        </span>
+                        
+                        <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold ${
+                            business.vendor?.user?.isOnline 
+                                ? 'bg-[#e8f8f0] text-[#00B67A]' 
+                                : 'bg-[#fff0f0] text-[#ff3333]'
+                        }`}>
+                            <span className={`w-2 h-2 rounded-full ${business.vendor?.user?.isOnline ? 'bg-[#00B67A]' : 'bg-[#ff3333]'}`} />
+                            {business.vendor?.user?.isOnline ? 'Online' : 'Offline'}
+                        </span>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 mb-3">
-                        <StatusBadge status={(business as any).status} />
-                        <VendorOnlineBadge isOnline={business.vendor?.user?.isOnline} />
-                        <BusinessOpenBadge business={business} />
-                    </div>
 
-                    <div className="flex items-center gap-2 mb-6 text-slate-500">
-
-                        <div className="flex items-center gap-1 text-amber-500 font-bold">
-                            <Star className="w-4 h-4 fill-amber-400" />
-                            <span>{business.averageRating || '4.5'}</span>
-                        </div>
-                        <div className="flex text-amber-500">
+                    {/* Rating */}
+                    <div className="flex items-center gap-3 mb-6">
+                        <span className="text-slate-600 font-medium text-base">
+                            {business.averageRating ? Number(business.averageRating).toFixed(1) : '5.0'}
+                        </span>
+                        <div className="flex items-center gap-1">
                             {[...Array(5)].map((_, i) => (
-                                <Star key={i} className={`w-3.5 h-3.5 ${i < Math.floor(Number(business.averageRating || 4.5)) ? 'fill-amber-500' : 'text-slate-200'}`} />
+                                <Star key={i} className="w-4 h-4 text-[#ffc107] fill-[#ffc107]" />
                             ))}
                         </div>
                     </div>
 
-                    <div className="mt-auto flex gap-2">
-                        <div className="btn-orbit-secondary flex-1 !text-sm !h-[42px] !rounded-[12px]">
+                    {/* View Details Button */}
+                    <div className="mt-auto">
+                        <div className="w-full py-2.5 rounded-lg border border-slate-200 bg-white text-[#112d4e] text-sm font-medium text-center hover:bg-slate-50 transition-colors">
                             View Details
                         </div>
-                        {showChat && (
-                            <ChatTrigger 
-                                businessId={business.id} 
-                                businessName={business.title}
-                                className="flex-1"
-                            />
-                        )}
                     </div>
                 </div>
             </div>

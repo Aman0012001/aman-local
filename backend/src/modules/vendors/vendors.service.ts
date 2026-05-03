@@ -204,6 +204,9 @@ export class VendorsService {
         const offers = allOffersEvents.filter(oe => oe.type === OfferType.OFFER);
         const events = allOffersEvents.filter(oe => oe.type === OfferType.EVENT);
 
+        // Get coordinates from the first listing if available
+        const primaryListing = listings[0];
+
         return {
             id: vendor.id,
             businessName: vendor.businessName || vendor.user?.fullName || 'Unnamed Business',
@@ -220,6 +223,12 @@ export class VendorsService {
             totalViews,
             categories,
             createdAt: vendor.user?.createdAt,
+            businessHours: vendor.businessHours ? Object.entries(vendor.businessHours).map(([day, val]) => ({
+                dayOfWeek: day,
+                ...val
+            })) : (primaryListing?.businessHours || []),
+            latitude: primaryListing?.latitude || null,
+            longitude: primaryListing?.longitude || null,
             listings: listings.map(l => ({
                 id: l.id,
                 title: l.title,
