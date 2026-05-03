@@ -10,7 +10,7 @@ export class ReviewsService {
     private reviewsRepository: Repository<Review>,
   ) {}
 
-  async findAll(query: any): Promise<Review[]> {
+  async findAll(query: any): Promise<{ data: Review[], meta: any }> {
     const { rating, limit = 10 } = query;
     
     // Create query builder to include relations needed by frontend
