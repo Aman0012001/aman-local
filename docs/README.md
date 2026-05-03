@@ -69,9 +69,6 @@ cd apps/api
 npm run start:dev
 ```
 
-### 3. Access API
-- **Web Interface:** https://local-business-listing-directctory-production.up.railway.app
-- **Users Endpoint:** https://local-business-listing-directctory-production.up.railway.app/api/v1/users
 
 ---
 
@@ -89,7 +86,6 @@ npm run start:dev
 - **Status:** Running
 - **Framework:** NestJS
 - **Database:** TypeORM + PostgreSQL
-- **Production URL:** https://local-business-listing-directctory-production.up.railway.app
 
 ---
 
