@@ -20,7 +20,7 @@ User:             postgres
 Password:         5432
 Status:           ✅ CONNECTED
 
-Total Tables:     15/15 ✅
+Total Tables:     36/36 ✅
 Seed Records:     22 records inserted
 Indexes:          25+ performance indexes
 
@@ -47,9 +47,18 @@ Subscription Tables:
   ✅ subscription_plans     - Available plans
   ✅ subscriptions          - Active subscriptions
   ✅ transactions           - Payment history
+  ✅ pricing_plans          - Tiered pricing
+  ✅ active_plans           - Current active plans
+  ✅ payouts                - Vendor payouts
 
 System Tables:
   ✅ notifications          - User notifications
+  ✅ notification_logs      - Notification history
+  ✅ search_logs            - User search history
+  ✅ system_settings        - Global configurations
+  ✅ offer_events           - Marketing events
+  ✅ promotion_bookings     - Promo history
+  ✅ promotion_pricing_rules - Promo logic
 
 ┌──────────────────────────────────────────────────────────────────┐
 │ 🚀 RUNNING SERVICES                                              │
@@ -141,7 +150,7 @@ Configuration:
 [✅] PostgreSQL service running
 [✅] Database 'webapp' created
 [✅] Password set to '5432'
-[✅] All 15 tables created
+[✅] All 36 tables created
 [✅] Seed data inserted (22 records)
 [✅] Indexes created (25+ indexes)
 [✅] Foreign keys configured
@@ -214,7 +223,7 @@ Count Records:
 └──────────────────────────────────────────────────────────────────┘
 
 ✅ Database:        Connected & Operational
-✅ Tables:          15/15 Created
+✅ Tables:          36/36 Created
 ✅ Seed Data:       22 Records Inserted
 ✅ Simple API:      Running on Port 3000
 ✅ Backend:         Configured & Ready
@@ -229,7 +238,7 @@ Count Records:
 ║                                                                  ║
 ╚══════════════════════════════════════════════════════════════════╝
 
-Generated: 2026-02-07 22:16 IST
+Generated: 2026-05-03 08:18 IST
 Database: webapp@localhost:5432
 Status: ✅ OPERATIONAL
 Version: PostgreSQL 18

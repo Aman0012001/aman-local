@@ -82,7 +82,7 @@ npm run start:dev
 - **Host:** localhost:5432
 - **User:** postgres
 - **Password:** 5432
-- **Tables:** 15
+- **Tables:** 36
 
 ### API
 - **Port:** 3001 (Local) / Railway Managed (Prod)
@@ -97,11 +97,11 @@ npm run start:dev
 
 | Category | Tables |
 |----------|--------|
-| **Users & Auth** | users, vendors |
-| **Business** | businesses, business_hours, business_amenities, categories, amenities |
-| **Engagement** | reviews, review_helpful_votes, leads, favorites |
-| **Subscriptions** | subscription_plans, subscriptions, transactions |
-| **System** | notifications |
+| **Users & Auth** | users, vendors, affiliates, referrals, follows |
+| **Business** | businesses, business_hours, business_amenities, categories, amenities, listing_views, favorites |
+| **Engagement** | reviews, review_helpful_votes, review_replies, leads, job_leads, job_lead_responses, comments, comment_replies |
+| **Subscriptions** | subscription_plans, pricing_plans, active_plans, subscriptions, transactions, payouts |
+| **System** | notifications, notification_logs, search_logs, system_settings, offer_events, promotion_bookings, promotion_pricing_rules |
 
 ---
 
@@ -143,11 +143,11 @@ docs/
 
 - ✅ PostgreSQL 18 - Running
 - ✅ Database 'webapp' - Connected
-- ✅ Simple API (Port 3000) - Running
-- ✅ 15 Tables Created
+- ✅ Simple API (Port 3001) - Running
+- ✅ 36 Tables Created
 - ✅ Seed Data Inserted
 
 ---
 
-**Last Updated:** 2026-02-07 22:20 IST  
+**Last Updated:** 2026-05-03 08:15 IST  
 **Status:** ✅ OPERATIONAL

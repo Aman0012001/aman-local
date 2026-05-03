@@ -1029,3 +1029,9 @@ NotFoundException: Listing not found
 [2026-05-03T01:13:27.062Z] findBySlug: test-mnh4czx8 - SUCCESS
 [2026-05-03T01:13:27.200Z] findBySlug: test-mnh4czx8 - Found in DB. Status: approved
 [2026-05-03T01:13:27.330Z] findBySlug: test-mnh4czx8 - SUCCESS
+[2026-05-03T02:35:17.913Z] findBySlug: karachi-auto-care-workshop-mmgs0upa (User: Public)
+[2026-05-03T02:35:18.183Z] findBySlug: karachi-auto-care-workshop-mmgs0upa (User: Public)
+[2026-05-03T02:35:18.524Z] findBySlug: karachi-auto-care-workshop-mmgs0upa - Found in DB. Status: approved
+[2026-05-03T02:35:18.662Z] findBySlug: karachi-auto-care-workshop-mmgs0upa - SUCCESS
+[2026-05-03T02:35:21.680Z] findBySlug: karachi-auto-care-workshop-mmgs0upa - Found in DB. Status: approved
+[2026-05-03T02:35:21.983Z] findBySlug: karachi-auto-care-workshop-mmgs0upa - SUCCESS
